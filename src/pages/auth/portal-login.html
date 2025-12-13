@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portal Login</title>
+  </head>
+
+  <body class="bg-linear-to-br from-red-50 via-white to-red-50">
+    <div class="min-h-screen flex items-center justify-center p-6">
+      <div class="w-full max-w-6xl">
+        <!-- Back to Home -->
+        <div class="mb-8">
+          <a
+            href="/index.html"
+            class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-all h-9 px-4 py-2 border border-gray-300 text-gray-600 hover:bg-gray-50"
+          >
+            <i data-lucide="arrow-left" class="size-4"></i>
+            Back to Home
+          </a>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <!-- Left Branding -->
+          <div class="text-center lg:text-left">
+            <div
+              class="flex items-center justify-center lg:justify-start gap-3 mb-6"
+            >
+              <div class="bg-red-600 p-2 rounded-lg">
+                <i data-lucide="heart" class="size-8 text-white fill-white"></i>
+              </div>
+              <div>
+                <div class="text-red-600 text-2xl">BloodConnect</div>
+                <div class="text-gray-500">Portal Access</div>
+              </div>
+            </div>
+
+            <h1 class="text-gray-900 mb-4">Welcome Back</h1>
+            <p class="text-gray-600 mb-6">
+              Select your role and login to access your dedicated portal. Manage
+              donations, requests, and save lives together.
+            </p>
+
+            <div class="space-y-3 text-gray-600">
+              <div class="flex items-center gap-3">
+                <div class="bg-red-100 p-2 rounded-full">
+                  <i data-lucide="shield" class="size-4 text-red-600"></i>
+                </div>
+                <span>Secure and encrypted access</span>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <div class="bg-red-100 p-2 rounded-full">
+                  <i data-lucide="heart" class="size-4 text-red-600"></i>
+                </div>
+                <span>Real-time blood request updates</span>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <div class="bg-red-100 p-2 rounded-full">
+                  <i data-lucide="building-2" class="size-4 text-red-600"></i>
+                </div>
+                <span>24/7 emergency support</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Login Card -->
+          <div>
+            <div class="bg-white p-8 rounded-xl shadow-xl border">
+              <div class="text-center mb-6">
+                <div
+                  id="selectedIcon"
+                  class="bg-red-600 size-16 rounded-lg flex items-center justify-center mx-auto mb-4"
+                >
+                  <i data-lucide="heart" class="size-8 text-white"></i>
+                </div>
+
+                <h3 class="text-gray-900 mb-2">Portal Login</h3>
+                <p class="text-gray-600">Select your role to continue</p>
+              </div>
+
+              <!-- Role Selector -->
+              <div class="space-y-4">
+                <div>
+                  <label class="text-gray-700 mb-2 block">Select Role</label>
+
+                  <div
+                    class="grid grid-cols-4 gap-2 p-1 bg-gray-100 rounded-lg"
+                  >
+                    <button
+                      class="role-btn active"
+                      data-role="admin"
+                      data-path="/src/pages/admin/dashboard.html"
+                    >
+                      <i data-lucide="shield" class="size-5 mx-auto mb-1"></i>
+                      <div class="text-xs">Admin</div>
+                    </button>
+
+                    <button
+                      class="role-btn"
+                      data-role="hospital"
+                      data-path="/src/pages/hospital/dashboard.html"
+                    >
+                      <i
+                        data-lucide="building-2"
+                        class="size-5 mx-auto mb-1"
+                      ></i>
+                      <div class="text-xs">Hospital</div>
+                    </button>
+
+                    <button
+                      class="role-btn"
+                      data-role="donor"
+                      data-path="/src/pages/donor/dashboard.html"
+                    >
+                      <i data-lucide="heart" class="size-5 mx-auto mb-1"></i>
+                      <div class="text-xs">Donor</div>
+                    </button>
+
+                    <button
+                      class="role-btn"
+                      data-role="seeker"
+                      data-path="/src/pages/seeker/request.html"
+                    >
+                      <i data-lucide="search" class="size-5 mx-auto mb-1"></i>
+                      <div class="text-xs">Seeker</div>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Login Button -->
+                <button
+                  id="loginBtn"
+                  class="w-full inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-all h-11 px-4 bg-red-600 text-white hover:bg-red-700"
+                >
+                  Login
+                  <i data-lucide="chevron-right" class="size-4"></i>
+                </button>
+
+                <div class="text-center text-sm text-gray-500 mt-4">
+                  Don't have an account?
+                  <a href="#" class="text-red-600 hover:underline"
+                    >Register here</a
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="text-center mt-6 text-gray-500">
+              Emergency Hotline:
+              <span class="text-red-600">1-800-BLOOD-NOW</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let selectedPath = "/src/pages/donor/dashboard.html";
+
+      document.querySelectorAll(".role-btn").forEach((btn) => {
+        btn.classList.add(
+          "px-3",
+          "py-2",
+          "rounded-md",
+          "transition-all",
+          "text-gray-600",
+          "hover:text-gray-900"
+        );
+
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".role-btn").forEach((b) => {
+            b.classList.remove(
+              "bg-white",
+              "text-red-600",
+              "shadow-sm",
+              "active"
+            );
+          });
+
+          btn.classList.add("bg-white", "text-red-600", "shadow-sm", "active");
+          selectedPath = btn.dataset.path;
+
+          const iconName = btn.querySelector("i").dataset.lucide;
+          document.getElementById(
+            "selectedIcon"
+          ).innerHTML = `<i data-lucide="${iconName}" class="size-8 text-white"></i>`;
+
+          lucide.createIcons();
+        });
+      });
+
+      document.getElementById("loginBtn").addEventListener("click", () => {
+        window.location.href = selectedPath;
+      });
+    </script>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
