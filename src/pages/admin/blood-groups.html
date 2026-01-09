@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Blood Group Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+
+    <!-- Layout -->
+    <div class="flex min-h-screen">
+
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white border-r flex flex-col">
+            <div class="p-5 flex items-center gap-3">
+                <div class="bg-red-500 text-white p-2 rounded-lg">❤</div>
+                <div>
+                    <h1 class="text-red-500 font-bold">BloodConnect</h1>
+                    <p class="text-sm text-gray-500">Admin Panel</p>
+                </div>
+            </div>
+
+            <nav class="mt-6">
+                <ul class="space-y-1">
+                    <li class="px-6 py-3 hover:bg-gray-100">Dashboard</li>
+                    <li class="px-6 py-3 hover:bg-gray-100">Donors</li>
+                    <li class="px-6 py-3 hover:bg-gray-100">Hospitals</li>
+                    <li class=" bg-red-50 border-r-4 border-red-500 px-6 py-3 text-red-500 font-medium">Blood Groups
+                    </li>
+                    <li class="px-6 py-3 hover:bg-gray-100">Reports</li>
+                    <li class="px-6 py-3 hover:bg-gray-100">Announcements</li>
+                    <li class="px-6 py-3 hover:bg-gray-100">Chat</li>
+                </ul>
+            </nav>
+
+            <div class="absolute bottom-5 left-6 text-red-500 text-sm">
+                Emergency: <strong>911</strong>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 space-y-8 flex flex-col">
+
+            <!-- Topbar -->
+            <div class="flex justify-between items-center mb-6">
+                <input type="text" placeholder="Search..." class="w-1/3 px-4 py-2 border rounded-lg">
+
+                <div class="flex items-center gap-6">
+                    <div class="relative">
+                        🔔
+                        <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-1 rounded-full">5</span>
+                    </div>
+                    <div>
+                        <p class="font-semibold">Admin User</p>
+                        <p class="text-sm text-gray-500">System Administrator</p>
+                    </div>
+                    <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">👤</div>
+                </div>
+            </div>
+
+            <!-- Header -->
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Blood Group Management</h1>
+                    <p class="text-gray-600">Monitor blood inventory and donor statistics</p>
+                </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="overflow-y-auto">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <p class="text-gray-600">Total Blood Types</p>
+                        <h2 class="text-2xl font-bold">8</h2>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <p class="text-gray-600">Total Donors</p>
+                        <h2 class="text-2xl font-bold">1,684</h2>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <p class="text-gray-600">Units Available</p>
+                        <h2 class="text-2xl font-bold">613</h2>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <p class="text-gray-600">Units Required</p>
+                        <h2 class="text-2xl font-bold">261</h2>
+                    </div>
+                </div>
+
+                <!-- Blood Group Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                    <!-- Card -->
+                    <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+                        <div class="flex justify-between mb-4">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-900">A+</h2>
+                                <span class="text-sm text-red-600 border border-red-600 px-2 py-1 rounded">Blood
+                                    Type</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="p-2 hover:bg-gray-100 rounded">
+                                    <i data-lucide="edit" class="w-4"></i>
+                                </button>
+                                <button class="p-2 hover:bg-red-50 rounded">
+                                    <i data-lucide="trash-2" class="w-4 text-red-600"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Registered Donors</span>
+                                <span class="font-semibold">342</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Available</span>
+                                <span class="bg-green-100 text-green-700 px-2 rounded">125</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Required</span>
+                                <span class="bg-yellow-100 text-yellow-700 px-2 rounded">45</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-4 border-t">
+                            <p class="text-gray-600 text-sm">Compatibility</p>
+                            <p class="text-sm font-medium">Can donate to A+, AB+</p>
+                        </div>
+
+                        <button class="mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded">
+                            View Details
+                        </button>
+                    </div>
+
+                    <!-- A- group -->
+
+                    <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+                        <div class="flex justify-between mb-4">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-900">A-</h2>
+                                <span class="text-sm text-red-600 border border-red-600 px-2 py-1 rounded">Blood
+                                    Type</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="p-2 hover:bg-gray-100 rounded">
+                                    <i data-lucide="edit" class="w-4"></i>
+                                </button>
+                                <button class="p-2 hover:bg-red-50 rounded">
+                                    <i data-lucide="trash-2" class="w-4 text-red-600"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Registered Donors</span>
+                                <span class="font-semibold">128</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Available</span>
+                                <span class="bg-green-100 text-green-700 px-2 rounded">48</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Required</span>
+                                <span class="bg-yellow-100 text-yellow-700 px-2 rounded">22</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-4 border-t">
+                            <p class="text-gray-600 text-sm">Compatibility</p>
+                            <p class="text-sm font-medium">Can donate to A+, A-, AB+, AB-</p>
+                        </div>
+
+                        <button class="mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded">
+                            View Details
+                        </button>
+                    </div>
+
+                    <!-- B+ group -->
+                    <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+                        <div class="flex justify-between mb-4">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-900">B+</h2>
+                                <span class="text-sm text-red-600 border border-red-600 px-2 py-1 rounded">Blood
+                                    Type</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="p-2 hover:bg-gray-100 rounded">
+                                    <i data-lucide="edit" class="w-4"></i>
+                                </button>
+                                <button class="p-2 hover:bg-red-50 rounded">
+                                    <i data-lucide="trash-2" class="w-4 text-red-600"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Registered Donors</span>
+                                <span class="font-semibold">289</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Available</span>
+                                <span class="bg-green-100 text-green-700 px-2 rounded">98</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Required</span>
+                                <span class="bg-yellow-100 text-yellow-700 px-2 rounded">38</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-4 border-t">
+                            <p class="text-gray-600 text-sm">Compatibility</p>
+                            <p class="text-sm font-medium">Can donate to B+, AB+</p>
+                        </div>
+
+                        <button class="mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded">
+                            View Details
+                        </button>
+                    </div>
+
+                    <!-- B- group -->
+                    <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+                        <div class="flex justify-between mb-4">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-900">B-</h2>
+                                <span class="text-sm text-red-600 border border-red-600 px-2 py-1 rounded">Blood
+                                    Type</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="p-2 hover:bg-gray-100 rounded">
+                                    <i data-lucide="edit" class="w-4"></i>
+                                </button>
+                                <button class="p-2 hover:bg-red-50 rounded">
+                                    <i data-lucide="trash-2" class="w-4 text-red-600"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Registered Donors</span>
+                                <span class="font-semibold">94</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Available</span>
+                                <span class="bg-green-100 text-green-700 px-2 rounded">32</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Required</span>
+                                <span class="bg-yellow-100 text-yellow-700 px-2 rounded">15</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-4 border-t">
+                            <p class="text-gray-600 text-sm">Compatibility</p>
+                            <p class="text-sm font-medium">Can donate to B+, B-, AB+, AB-</p>
+                        </div>
+
+                        <button class="mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded">
+                            View Details
+                        </button>
+                    </div>
+
+                    <!-- AB+ group -->
+                    <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+                        <div class="flex justify-between mb-4">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-900">AB+</h2>
+                                <span class="text-sm text-red-600 border border-red-600 px-2 py-1 rounded">Blood
+                                    Type</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="p-2 hover:bg-gray-100 rounded">
+                                    <i data-lucide="edit" class="w-4"></i>
+                                </button>
+                                <button class="p-2 hover:bg-red-50 rounded">
+                                    <i data-lucide="trash-2" class="w-4 text-red-600"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Registered Donors</span>
+                                <span class="font-semibold">156</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Available</span>
+                                <span class="bg-green-100 text-green-700 px-2 rounded">58</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Required</span>
+                                <span class="bg-yellow-100 text-yellow-700 px-2 rounded">28</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-4 border-t">
+                            <p class="text-gray-600 text-sm">Compatibility</p>
+                            <p class="text-sm font-medium">Can donate to AB+ only</p>
+                        </div>
+
+                        <button class="mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded">
+                            View Details
+                        </button>
+                    </div>
+
+                    <!-- AB- Group -->
+                    <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+                        <div class="flex justify-between mb-4">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-900">AB-</h2>
+                                <span class="text-sm text-red-600 border border-red-600 px-2 py-1 rounded">Blood
+                                    Type</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="p-2 hover:bg-gray-100 rounded">
+                                    <i data-lucide="edit" class="w-4"></i>
+                                </button>
+                                <button class="p-2 hover:bg-red-50 rounded">
+                                    <i data-lucide="trash-2" class="w-4 text-red-600"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Registered Donors</span>
+                                <span class="font-semibold">67</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Available</span>
+                                <span class="bg-green-100 text-green-700 px-2 rounded">24</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Required</span>
+                                <span class="bg-yellow-100 text-yellow-700 px-2 rounded">12</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-4 border-t">
+                            <p class="text-gray-600 text-sm">Compatibility</p>
+                            <p class="text-sm font-medium">Can donate to AB+, AB-</p>
+                        </div>
+
+                        <button class="mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded">
+                            View Details
+                        </button>
+                    </div>
+
+                    <!-- O+ group -->
+                    <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+                        <div class="flex justify-between mb-4">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-900">O+</h2>
+                                <span class="text-sm text-red-600 border border-red-600 px-2 py-1 rounded">Blood
+                                    Type</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="p-2 hover:bg-gray-100 rounded">
+                                    <i data-lucide="edit" class="w-4"></i>
+                                </button>
+                                <button class="p-2 hover:bg-red-50 rounded">
+                                    <i data-lucide="trash-2" class="w-4 text-red-600"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Registered Donors</span>
+                                <span class="font-semibold">423</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Available</span>
+                                <span class="bg-green-100 text-green-700 px-2 rounded">156</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Required</span>
+                                <span class="bg-yellow-100 text-yellow-700 px-2 rounded">67</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-4 border-t">
+                            <p class="text-gray-600 text-sm">Compatibility</p>
+                            <p class="text-sm font-medium">Can donate to all positive types</p>
+                        </div>
+
+                        <button class="mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded">
+                            View Details
+                        </button>
+                    </div>
+
+                    <!-- O- Group -->
+                    <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+                        <div class="flex justify-between mb-4">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-900">O-</h2>
+                                <span class="text-sm text-red-600 border border-red-600 px-2 py-1 rounded">Blood
+                                    Type</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="p-2 hover:bg-gray-100 rounded">
+                                    <i data-lucide="edit" class="w-4"></i>
+                                </button>
+                                <button class="p-2 hover:bg-red-50 rounded">
+                                    <i data-lucide="trash-2" class="w-4 text-red-600"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Registered Donors</span>
+                                <span class="font-semibold">185</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Available</span>
+                                <span class="bg-green-100 text-green-700 px-2 rounded">72</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Required</span>
+                                <span class="bg-yellow-100 text-yellow-700 px-2 rounded">34</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-4 border-t">
+                            <p class="text-gray-600 text-sm">Compatibility</p>
+                            <p class="text-sm font-medium">Universal donor – all blood types</p>
+                        </div>
+
+                        <button class="mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+
+
+
+            </div>
+
+            <!-- Alert -->
+            <div class="bg-white p-6 rounded-lg shadow border-l-4 border-yellow-500 flex gap-4">
+                <div class="bg-yellow-100 p-3 rounded">
+                    <i data-lucide="droplet" class="text-yellow-600"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-900">Low Inventory Alert</h3>
+                    <p class="text-gray-600 mb-3">
+                        Blood types <strong>B-</strong> and <strong>AB-</strong> are running low.
+                    </p>
+                    <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded flex items-center gap-2">
+                        <i data-lucide="megaphone"></i> Send Emergency Alert
+                    </button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>
