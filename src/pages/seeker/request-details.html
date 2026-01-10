@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Seeker | Request Details</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="module" src="/src/main.js"></script>
+  </head>
+
+  <body class="bg-gray-50">
+    <div class="min-h-screen">
+      <!-- ================= SIDEBAR ================= -->
+      <aside
+        class="fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 flex flex-col"
+      >
+        <div class="p-6 border-b border-gray-200">
+          <a href="/" class="flex items-center gap-1">
+            <img
+              src="https://i.ibb.co.com/8LCPRHx3/nav-Love.png"
+              class="w-14 h-14"
+            />
+            <div>
+              <p class="text-[#E70110] font-medium">BloodConnect</p>
+              <p class="text-gray-500 font-medium">Save Lives Today</p>
+            </div>
+          </a>
+        </div>
+
+        <nav class="flex-1 py-4 text-sm">
+          <a
+            href="request.html"
+            class="flex items-center gap-3 px-6 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600"
+          >
+            <i data-lucide="send" class="w-5 h-5"></i>
+            Submit Blood Request
+          </a>
+
+          <a
+            href="track-request.html"
+            class="flex items-center gap-3 px-6 py-3 bg-red-50 text-red-600 border-r-4 border-red-600"
+          >
+            <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+            Track Request
+          </a>
+
+          <a
+            href="seeker-chat.html"
+            class="flex items-center gap-3 px-6 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600"
+          >
+            <i data-lucide="message-square" class="w-5 h-5"></i>
+            Chat with Donor
+          </a>
+        </nav>
+
+        <div class="p-4 border-t border-gray-200 text-center text-gray-500">
+          Emergency: <span class="text-red-600 font-medium">911</span>
+        </div>
+      </aside>
+
+      <!-- ================= HEADER ================= -->
+      <header
+        class="fixed top-0 left-64 right-0 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 z-10"
+      >
+        <div class="flex-1 max-w-md relative">
+          <i
+            data-lucide="search"
+            class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+          ></i>
+          <input
+            class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
+            placeholder="Search..."
+          />
+        </div>
+
+        <div class="flex items-center gap-4">
+          <button class="relative p-2 rounded-lg hover:bg-gray-100">
+            <i data-lucide="bell" class="w-5 h-5 text-gray-700"></i>
+            <span
+              class="absolute -top-1 -right-1 w-5 h-5 bg-red-600 text-white text-xs rounded-full flex items-center justify-center"
+            >
+              3
+            </span>
+          </button>
+
+          <div class="flex items-center gap-3 pl-4 border-l border-gray-200">
+            <div class="text-right">
+              <p class="text-sm text-gray-900">Guest User</p>
+              <p class="text-xs text-gray-500">Blood Seeker</p>
+            </div>
+            <div
+              class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center"
+            >
+              <i data-lucide="user" class="w-5 h-5 text-red-600"></i>
+            </div>
+          </div>
+
+          <button
+            class="p-2 rounded-lg text-gray-600 hover:text-red-600 hover:bg-gray-100"
+          >
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- ================= MAIN ================= -->
+      <main class="ml-64 pt-16">
+        <div class="p-8 space-y-8">
+          <!-- Page Header -->
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 class="text-2xl font-semibold text-gray-900 mb-2">
+                Request Details
+              </h1>
+              <p class="text-gray-600">Detailed view of your blood request</p>
+            </div>
+
+            <a
+              href="track-request.html"
+              class="border border-gray-300 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+            >
+              <i data-lucide="arrow-left" class="w-4 h-4"></i>
+              Back
+            </a>
+          </div>
+
+          <!-- ================= REQUEST SUMMARY ================= -->
+          <div
+            class="bg-white border rounded-xl p-6 grid grid-cols-1 md:grid-cols-3 gap-6"
+          >
+            <div>
+              <p class="text-gray-500 text-sm">Request ID</p>
+              <p class="font-medium text-gray-900">REQ001</p>
+            </div>
+
+            <div>
+              <p class="text-gray-500 text-sm">Blood Type</p>
+              <span
+                class="inline-block border border-red-600 text-red-600 px-2 py-0.5 rounded-md text-xs"
+              >
+                O+
+              </span>
+            </div>
+
+            <div>
+              <p class="text-gray-500 text-sm">Status</p>
+              <span
+                class="inline-block bg-blue-100 text-blue-800 border border-blue-200 px-2 py-0.5 rounded-md text-xs"
+              >
+                Donor Matched
+              </span>
+            </div>
+
+            <div>
+              <p class="text-gray-500 text-sm">Urgency</p>
+              <span
+                class="inline-block bg-red-600 text-white px-2 py-0.5 rounded-md text-xs"
+              >
+                Emergency
+              </span>
+            </div>
+
+            <div>
+              <p class="text-gray-500 text-sm">Quantity</p>
+              <p class="font-medium text-gray-900">2 Units</p>
+            </div>
+
+            <div>
+              <p class="text-gray-500 text-sm">Required By</p>
+              <p class="font-medium text-gray-900">2024-11-26</p>
+            </div>
+          </div>
+
+          <!-- ================= PATIENT & HOSPITAL ================= -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white border rounded-xl p-6">
+              <h3 class="font-semibold text-gray-900 mb-4">
+                Patient Information
+              </h3>
+              <ul class="space-y-2 text-sm text-gray-700">
+                <li><strong>Name:</strong> John Doe</li>
+                <li><strong>Age:</strong> 45</li>
+                <li><strong>Contact:</strong> +880 1XXXXXXXXX</li>
+                <li><strong>City:</strong> Dhaka</li>
+              </ul>
+            </div>
+
+            <div class="bg-white border rounded-xl p-6">
+              <h3 class="font-semibold text-gray-900 mb-4">
+                Hospital Information
+              </h3>
+              <ul class="space-y-2 text-sm text-gray-700">
+                <li><strong>Hospital:</strong> City Hospital</li>
+                <li><strong>Department:</strong> Emergency</li>
+                <li><strong>Address:</strong> Dhaka, Bangladesh</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- ================= DONOR RESPONSES ================= -->
+          <div class="bg-white border rounded-xl p-6">
+            <h3 class="font-semibold text-gray-900 mb-4">Donor Responses</h3>
+
+            <div class="space-y-4">
+              <div
+                class="flex items-center justify-between border rounded-lg p-4"
+              >
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center"
+                  >
+                    <i data-lucide="user" class="w-5 h-5 text-red-600"></i>
+                  </div>
+                  <div>
+                    <p class="font-medium text-gray-900">Donor Rahim</p>
+                    <p class="text-sm text-gray-600">
+                      Available tomorrow morning
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href="seeker-chat.html"
+                  class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg flex items-center gap-1"
+                >
+                  <i data-lucide="message-square" class="w-4 h-4"></i>
+                  Chat
+                </a>
+              </div>
+
+              <div
+                class="flex items-center justify-between border rounded-lg p-4"
+              >
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center"
+                  >
+                    <i data-lucide="user" class="w-5 h-5 text-blue-600"></i>
+                  </div>
+                  <div>
+                    <p class="font-medium text-gray-900">Donor Karim</p>
+                    <p class="text-sm text-gray-600">
+                      Waiting for confirmation
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href="seeker-chat.html"
+                  class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg flex items-center gap-1"
+                >
+                  <i data-lucide="message-square" class="w-4 h-4"></i>
+                  Chat
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

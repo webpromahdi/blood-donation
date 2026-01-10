@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Seeker | Track Requests</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="module" src="/src/main.js"></script>
+  </head>
+
+  <body class="bg-gray-50">
+    <div class="min-h-screen">
+      <!-- ================= SIDEBAR ================= -->
+      <aside
+        class="fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 flex flex-col"
+      >
+        <div class="p-6 border-b border-gray-200">
+          <a href="/" class="flex items-center gap-1">
+            <img
+              src="https://i.ibb.co.com/8LCPRHx3/nav-Love.png"
+              class="w-14 h-14"
+            />
+            <div>
+              <p class="text-[#E70110] font-medium">BloodConnect</p>
+              <p class="text-gray-500 font-medium">Save Lives Today</p>
+            </div>
+          </a>
+        </div>
+
+        <nav class="flex-1 py-4 text-sm">
+          <a
+            href="request.html"
+            class="flex items-center gap-3 px-6 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600"
+          >
+            <i data-lucide="send" class="w-5 h-5"></i>
+            Submit Blood Request
+          </a>
+
+          <a
+            href="#"
+            class="flex items-center gap-3 px-6 py-3 bg-red-50 text-red-600 border-r-4 border-red-600"
+          >
+            <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+            Track Request
+          </a>
+
+          <a
+            href="seeker-chat.html"
+            class="flex items-center gap-3 px-6 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600"
+          >
+            <i data-lucide="message-square" class="w-5 h-5"></i>
+            Chat with Donor
+          </a>
+        </nav>
+
+        <div class="p-4 border-t border-gray-200 text-center text-gray-500">
+          Emergency: <span class="text-red-600 font-medium">911</span>
+        </div>
+      </aside>
+
+      <!-- ================= HEADER ================= -->
+      <header
+        class="fixed top-0 left-64 right-0 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 z-10"
+      >
+        <div class="flex-1 max-w-md relative">
+          <i
+            data-lucide="search"
+            class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+          ></i>
+          <input
+            class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
+            placeholder="Search..."
+          />
+        </div>
+
+        <div class="flex items-center gap-4">
+          <button class="relative p-2 rounded-lg hover:bg-gray-100">
+            <i data-lucide="bell" class="w-5 h-5 text-gray-700"></i>
+            <span
+              class="absolute -top-1 -right-1 w-5 h-5 bg-red-600 text-white text-xs rounded-full flex items-center justify-center"
+            >
+              3
+            </span>
+          </button>
+
+          <div class="flex items-center gap-3 pl-4 border-l border-gray-200">
+            <div class="text-right">
+              <p class="text-sm text-gray-900">Guest User</p>
+              <p class="text-xs text-gray-500">Blood Seeker</p>
+            </div>
+            <div
+              class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center"
+            >
+              <i data-lucide="user" class="w-5 h-5 text-red-600"></i>
+            </div>
+          </div>
+
+          <a
+            class="p-2 rounded-lg text-gray-600 hover:text-red-600 hover:bg-gray-100"
+            href="/"
+          >
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+          </a>
+        </div>
+      </header>
+
+      <!-- ================= MAIN ================= -->
+      <main class="ml-64 pt-16">
+        <div class="p-8 space-y-8">
+          <!-- Page Header -->
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 class="text-2xl font-semibold text-gray-900 mb-2">
+                Track Your Requests
+              </h1>
+              <p class="text-gray-600">
+                View and monitor all your blood donation requests
+              </p>
+            </div>
+
+            <a
+              href="request.html"
+              class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+            >
+              <i data-lucide="send" class="w-4 h-4"></i>
+              New Request
+            </a>
+          </div>
+
+          <!-- ================= SUMMARY CARDS ================= -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="bg-white border rounded-xl p-6 flex justify-between">
+              <div>
+                <p class="text-gray-600">Total Requests</p>
+                <p class="text-xl font-semibold text-gray-900">4</p>
+              </div>
+              <i data-lucide="clipboard-list" class="w-8 h-8 text-blue-600"></i>
+            </div>
+
+            <div class="bg-white border rounded-xl p-6 flex justify-between">
+              <div>
+                <p class="text-gray-600">Active Requests</p>
+                <p class="text-xl font-semibold text-gray-900">3</p>
+              </div>
+              <i data-lucide="alert-circle" class="w-8 h-8 text-yellow-600"></i>
+            </div>
+
+            <div class="bg-white border rounded-xl p-6 flex justify-between">
+              <div>
+                <p class="text-gray-600">Donors Responded</p>
+                <p class="text-xl font-semibold text-gray-900">18</p>
+              </div>
+              <i data-lucide="droplet" class="w-8 h-8 text-green-600"></i>
+            </div>
+
+            <div class="bg-white border rounded-xl p-6 flex justify-between">
+              <div>
+                <p class="text-gray-600">Completed</p>
+                <p class="text-xl font-semibold text-gray-900">1</p>
+              </div>
+              <i data-lucide="droplet" class="w-8 h-8 text-red-600"></i>
+            </div>
+          </div>
+
+          <!-- ================= TABLE ================= -->
+          <div class="bg-white border rounded-xl overflow-hidden">
+            <div class="p-6 border-b border-gray-200">
+              <h2 class="text-lg font-semibold text-gray-900">
+                All Blood Requests
+              </h2>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead class="bg-gray-50 border-b">
+                  <tr>
+                    <th class="px-6 py-4 text-left">Request ID</th>
+                    <th class="px-6 py-4 text-left">Patient</th>
+                    <th class="px-6 py-4 text-left">Blood</th>
+                    <th class="px-6 py-4 text-left">Qty</th>
+                    <th class="px-6 py-4 text-left">Hospital</th>
+                    <th class="px-6 py-4 text-left">Urgency</th>
+                    <th class="px-6 py-4 text-left">Status</th>
+                    <th class="px-6 py-4 text-left">Submitted</th>
+                    <th class="px-6 py-4 text-left">Action</th>
+                  </tr>
+                </thead>
+
+                <tbody class="divide-y">
+                  <!-- REQ001 -->
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4">REQ001</td>
+                    <td class="px-6 py-4">John Doe</td>
+                    <td class="px-6 py-4">
+                      <span
+                        class="border border-red-600 text-red-600 px-2 py-0.5 rounded-md text-xs"
+                        >O+</span
+                      >
+                    </td>
+                    <td class="px-6 py-4">2 Units</td>
+                    <td class="px-6 py-4">City Hospital</td>
+                    <td class="px-6 py-4">
+                      <span
+                        class="bg-red-600 text-white px-2 py-0.5 rounded-md text-xs"
+                        >Emergency</span
+                      >
+                    </td>
+                    <td class="px-6 py-4">
+                      <span
+                        class="bg-blue-100 text-blue-800 border border-blue-200 px-2 py-0.5 rounded-md text-xs"
+                        >Donor Matched</span
+                      >
+                    </td>
+                    <td class="px-6 py-4 text-gray-600">2024-11-24 10:30 AM</td>
+                    <td class="px-6 py-4">
+                      <a
+                        href="request-details.html"
+                        class="border border-red-600 text-red-600 px-3 py-1 rounded-lg hover:bg-red-50 flex items-center gap-1 w-fit"
+                      >
+                        <i data-lucide="eye" class="w-4 h-4"></i>
+                        View Details
+                      </a>
+                    </td>
+                  </tr>
+
+                  <!-- REQ002 -->
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4">REQ002</td>
+                    <td class="px-6 py-4">Jane Smith</td>
+                    <td class="px-6 py-4">
+                      <span
+                        class="border border-red-600 text-red-600 px-2 py-0.5 rounded-md text-xs"
+                        >A-</span
+                      >
+                    </td>
+                    <td class="px-6 py-4">1 Unit</td>
+                    <td class="px-6 py-4">General Hospital</td>
+                    <td class="px-6 py-4">
+                      <span
+                        class="bg-blue-600 text-white px-2 py-0.5 rounded-md text-xs"
+                        >Normal</span
+                      >
+                    </td>
+                    <td class="px-6 py-4">
+                      <span
+                        class="bg-yellow-100 text-yellow-800 border border-yellow-200 px-2 py-0.5 rounded-md text-xs"
+                        >Searching for Donor</span
+                      >
+                    </td>
+                    <td class="px-6 py-4 text-gray-600">2024-11-25 08:15 AM</td>
+                    <td class="px-6 py-4">
+                      <a
+                        href="request-details.html"
+                        class="border border-red-600 text-red-600 px-3 py-1 rounded-lg hover:bg-red-50 flex items-center gap-1 w-fit"
+                      >
+                        <i data-lucide="eye" class="w-4 h-4"></i>
+                        View Details
+                      </a>
+                    </td>
+                  </tr>
+
+                  <!-- REQ003 -->
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4">REQ003</td>
+                    <td class="px-6 py-4">Bob Johnson</td>
+                    <td class="px-6 py-4">
+                      <span
+                        class="border border-red-600 text-red-600 px-2 py-0.5 rounded-md text-xs"
+                        >B+</span
+                      >
+                    </td>
+                    <td class="px-6 py-4">3 Units</td>
+                    <td class="px-6 py-4">Medical Center</td>
+                    <td class="px-6 py-4">
+                      <span
+                        class="bg-red-600 text-white px-2 py-0.5 rounded-md text-xs"
+                        >Emergency</span
+                      >
+                    </td>
+                    <td class="px-6 py-4">
+                      <span
+                        class="bg-blue-100 text-blue-800 border border-blue-200 px-2 py-0.5 rounded-md text-xs"
+                        >Donation Scheduled</span
+                      >
+                    </td>
+                    <td class="px-6 py-4 text-gray-600">2024-11-23 02:45 PM</td>
+                    <td class="px-6 py-4">
+                      <a
+                        href="request-details.html"
+                        class="border border-red-600 text-red-600 px-3 py-1 rounded-lg hover:bg-red-50 flex items-center gap-1 w-fit"
+                      >
+                        <i data-lucide="eye" class="w-4 h-4"></i>
+                        View Details
+                      </a>
+                    </td>
+                  </tr>
+
+                  <!-- REQ004 -->
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4">REQ004</td>
+                    <td class="px-6 py-4">Alice Williams</td>
+                    <td class="px-6 py-4">
+                      <span
+                        class="border border-red-600 text-red-600 px-2 py-0.5 rounded-md text-xs"
+                        >AB+</span
+                      >
+                    </td>
+                    <td class="px-6 py-4">1 Unit</td>
+                    <td class="px-6 py-4">Community Hospital</td>
+                    <td class="px-6 py-4">
+                      <span
+                        class="bg-blue-600 text-white px-2 py-0.5 rounded-md text-xs"
+                        >Normal</span
+                      >
+                    </td>
+                    <td class="px-6 py-4">
+                      <span
+                        class="bg-green-100 text-green-800 border border-green-200 px-2 py-0.5 rounded-md text-xs"
+                        >Completed</span
+                      >
+                    </td>
+                    <td class="px-6 py-4 text-gray-600">2024-11-20 11:20 AM</td>
+                    <td class="px-6 py-4">
+                      <a
+                        href="request-details.html"
+                        class="border border-red-600 text-red-600 px-3 py-1 rounded-lg hover:bg-red-50 flex items-center gap-1 w-fit"
+                      >
+                        <i data-lucide="eye" class="w-4 h-4"></i>
+                        View Details
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
