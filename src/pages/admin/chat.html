@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Chat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+
+<div class="flex min-h-screen">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-white border-r">
+    <div class="p-5 flex items-center gap-3">
+      <div class="bg-red-500 text-white p-2 rounded-lg">❤</div>
+      <div>
+        <h1 class="text-red-500 font-bold">BloodConnect</h1>
+        <p class="text-sm text-gray-500">Admin Panel</p>
+      </div>
+    </div>
+
+    <nav class="mt-6">
+      <ul class="space-y-1">
+        <li class="px-6 py-3 hover:bg-gray-100">Dashboard</li>
+        <li class="px-6 py-3 hover:bg-gray-100">Donors</li>
+        <li class="px-6 py-3 hover:bg-gray-100">Hospitals</li>
+        <li class="px-6 py-3 hover:bg-gray-100">Blood Groups</li>
+        <li class="px-6 py-3 hover:bg-gray-100">Reports</li>
+        <li class="px-6 py-3 hover:bg-gray-100">Announcements</li>
+        <li class=" bg-red-50 border-r-4 border-red-500 px-6 py-3 text-red-500 font-medium">Chat</li>
+      </ul>
+    </nav>
+
+    <div class="absolute bottom-5 left-6 text-red-500 text-sm">
+      Emergency: <strong>911</strong>
+    </div>
+  </aside>
+
+  <!-- Main Area -->
+  <div class="flex-1 flex flex-col">
+
+    <!-- Top Bar -->
+    <header class="bg-white border-b px-8 py-4 flex items-center justify-between">
+      <div class="relative w-full max-w-md">
+        <input
+          type="text"
+          placeholder="Search alerts, donors, hospitals..."
+          class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+        />
+        <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
+      </div>
+
+      <div class="flex items-center gap-6">
+        <div class="relative cursor-pointer">
+          <span class="text-xl">🔔</span>
+          <span class="absolute -top-1 -right-1 bg-red-600 text-white text-xs px-1.5 rounded-full">5</span>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="text-right">
+            <p class="font-semibold">Admin User</p>
+            <p class="text-sm text-gray-500">System Administrator</p>
+          </div>
+          <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600 font-semibold">
+            AU
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Chat Section -->
+    <div class="flex-1 p-6">
+      <div class="flex h-full bg-white rounded-xl overflow-hidden border">
+
+        <!-- LEFT: Conversations -->
+        <div class="w-80 border-r flex flex-col">
+
+          <div class="p-4 font-semibold">Messages</div>
+
+          <div class="px-4 pb-3">
+            <input
+              type="text"
+              placeholder="Search conversations..."
+              class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-500"
+            />
+          </div>
+
+          <div class="flex-1 overflow-y-auto space-y-1 px-2">
+
+            <!-- Conversation Item -->
+            <div onclick="selectUser('City Hospital')"
+                 class="p-3 rounded-lg cursor-pointer hover:bg-gray-100 bg-gray-50">
+              <p class="font-semibold">City Hospital</p>
+              <p class="text-sm text-gray-500 truncate">Emergency blood needed</p>
+            </div>
+
+            <div onclick="selectUser('Rahim (Donor)')"
+                 class="p-3 rounded-lg cursor-pointer hover:bg-gray-100">
+              <p class="font-semibold">Rahim (Donor)</p>
+              <p class="text-sm text-gray-500 truncate">I want to donate blood</p>
+            </div>
+
+            <div onclick="selectUser('Green Life Hospital')"
+                 class="p-3 rounded-lg cursor-pointer hover:bg-gray-100">
+              <p class="font-semibold">Green Life Hospital</p>
+              <p class="text-sm text-gray-500 truncate">Request status update</p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- RIGHT: Chat -->
+        <div class="flex-1 flex flex-col">
+
+          <!-- Chat Header -->
+          <div class="p-4 border-b flex items-center justify-between">
+            <div>
+              <h3 id="chatUser" class="font-semibold">City Hospital</h3>
+              <p class="text-xs text-green-600">Online</p>
+            </div>
+            <button class="text-gray-500">⋮</button>
+          </div>
+
+          <!-- Messages -->
+          <div id="messages" class="flex-1 p-4 space-y-4 overflow-y-auto bg-gray-50">
+
+            <!-- Incoming -->
+            <div class="flex">
+              <div class="bg-gray-200 px-4 py-2 rounded-lg max-w-xs">
+                Hello Admin, we urgently need O+ blood.
+              </div>
+            </div>
+
+            <!-- Outgoing -->
+            <div class="flex justify-end">
+              <div class="bg-red-600 text-white px-4 py-2 rounded-lg max-w-xs">
+                We are checking available donors now.
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Input -->
+          <div class="p-4 border-t flex items-center gap-2">
+            <input
+              id="messageInput"
+              type="text"
+              placeholder="Type a message..."
+              class="flex-1 border rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-500"
+            />
+            <button
+              onclick="sendMessage()"
+              class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+              Send
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function selectUser(name) {
+    document.getElementById("chatUser").innerText = name;
+
+    document.getElementById("messages").innerHTML = `
+      <div class="flex">
+        <div class="bg-gray-200 px-4 py-2 rounded-lg max-w-xs">
+          Hello Admin, I need help regarding a request.
+        </div>
+      </div>
+      <div class="flex justify-end">
+        <div class="bg-red-600 text-white px-4 py-2 rounded-lg max-w-xs">
+          Sure, please tell me the details.
+        </div>
+      </div>
+    `;
+  }
+
+  function sendMessage() {
+    const input = document.getElementById("messageInput");
+    if (!input.value.trim()) return;
+
+    document.getElementById("messages").innerHTML += `
+      <div class="flex justify-end">
+        <div class="bg-red-600 text-white px-4 py-2 rounded-lg max-w-xs">
+          ${input.value}
+        </div>
+      </div>
+    `;
+    input.value = "";
+  }
+</script>
+
+</body>
+</html>
