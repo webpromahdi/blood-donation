@@ -1,4 +1,5 @@
-<?php
+﻿<?php
+require_once __DIR__ . '/../../config/cors.php';
 /**
  * API: Search Users for Chat
  * GET /api/chat/search-users.php
@@ -17,7 +18,6 @@
  * - context_id (int, optional): The ID of the context entity
  */
 
-header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);

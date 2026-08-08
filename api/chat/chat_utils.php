@@ -1,4 +1,5 @@
-<?php
+﻿<?php
+require_once __DIR__ . '/../../config/cors.php';
 /**
  * Chat Utility Functions
  * Implements permission matrix, context validation, conversation helpers, and rate limiting

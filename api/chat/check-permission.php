@@ -1,4 +1,5 @@
-<?php
+﻿<?php
+require_once __DIR__ . '/../../config/cors.php';
 /**
  * API: Check Chat Permission (Pre-flight)
  * GET /api/chat/check-permission.php
@@ -10,7 +11,6 @@
  * - voluntary_donation_id (int, optional): Voluntary donation context
  */
 
-header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);

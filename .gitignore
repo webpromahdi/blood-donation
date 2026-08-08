@@ -31,3 +31,10 @@ dist-ssr
 php_errors.log
 
 docs
+
+# React Client (client/)
+client/node_modules/
+client/dist/
+client/.env
+client/.env.local
+client/.env.*.local

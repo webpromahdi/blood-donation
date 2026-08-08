@@ -1,4 +1,5 @@
-<?php
+﻿<?php
+require_once __DIR__ . '/../../config/cors.php';
 /**
  * API: Get Messages (Fetch Conversation)
  * GET /api/chat/get-messages.php
@@ -10,7 +11,6 @@
  * - since_id (int, optional): Only fetch messages after this ID
  */
 
-header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);

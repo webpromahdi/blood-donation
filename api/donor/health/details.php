@@ -1,4 +1,5 @@
-<?php
+﻿<?php
+require_once __DIR__ . '/../../config/cors.php';
 /**
  * Get Donor Health Details Endpoint
  * GET /api/donor/health/details.php?donor_id={id}&request_id={id}
@@ -14,10 +15,6 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);

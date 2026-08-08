@@ -1,20 +1,13 @@
-<?php
+﻿<?php
+require_once __DIR__ . '/../../config/cors.php';
 /**
  * User Login Endpoint
  * POST /api/auth/login.php
  */
 
 // CORS headers for frontend
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
 
-// Handle preflight request
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
+
 
 // Only allow POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

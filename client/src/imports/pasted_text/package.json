@@ -1,0 +1,361 @@
+You are building "BloodConnect" — a professional blood donation platform (Bangladesh context).
+Tech Stack: React 18 + Vite, TailwindCSS v4, react-router-dom v6, lucide-react, react-chartjs-2 + chart.js
+
+Generate ALL of the following files exactly:
+
+─────────────────────────────────────
+FILE 1: package.json
+─────────────────────────────────────
+{
+  "name": "bloodconnect-client",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.24.0",
+    "lucide-react": "^0.400.0",
+    "chart.js": "^4.4.3",
+    "react-chartjs-2": "^5.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.3.1",
+    "tailwindcss": "^4.0.0",
+    "@tailwindcss/vite": "^4.0.0"
+  }
+}
+
+─────────────────────────────────────
+FILE 2: vite.config.js
+─────────────────────────────────────
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: { '@': '/src' }
+  },
+  server: { port: 5173 }
+})
+
+─────────────────────────────────────
+FILE 3: index.html
+─────────────────────────────────────
+Standard Vite React index.html with:
+- <link> Google Fonts Inter (weights 400,500,600,700)
+- <div id="root">
+- <script type="module" src="/src/main.jsx">
+- meta viewport, charset, title "BloodConnect — Save Lives"
+
+─────────────────────────────────────
+FILE 4: src/styles/globals.css
+─────────────────────────────────────
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --color-primary: #DC2626;
+  --color-primary-dark: #B91C1C;
+  --color-primary-light: #FEF2F2;
+  --color-bg: #ffffff;
+  --color-bg-secondary: #F9FAFB;
+  --color-bg-card: #ffffff;
+  --color-border: #E5E7EB;
+  --color-text-primary: #111827;
+  --color-text-secondary: #6B7280;
+  --color-text-muted: #9CA3AF;
+  --color-sidebar-bg: #ffffff;
+  --color-sidebar-active-bg: #FEF2F2;
+  --color-sidebar-active-text: #DC2626;
+  --color-sidebar-border: #E5E7EB;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.dark {
+  --color-primary-light: #2D1515;
+  --color-bg: #0F172A;
+  --color-bg-secondary: #1E293B;
+  --color-bg-card: #1E293B;
+  --color-border: #334155;
+  --color-text-primary: #F1F5F9;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+  --color-sidebar-bg: #1E293B;
+  --color-sidebar-active-bg: #2D1515;
+  --color-sidebar-active-text: #FCA5A5;
+  --color-sidebar-border: #334155;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+* { transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 3px; }
+.dark ::-webkit-scrollbar-thumb { background: #4B5563; }
+
+/* Sidebar animation */
+.sidebar-transition { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+/* Skeleton pulse */
+.skeleton { animation: skeleton-pulse 1.5s ease-in-out infinite; background: linear-gradient(90deg, #F3F4F6 25%, #E5E7EB 50%, #F3F4F6 75%); background-size: 200% 100%; }
+.dark .skeleton { background: linear-gradient(90deg, #374151 25%, #4B5563 50%, #374151 75%); background-size: 200% 100%; }
+@keyframes skeleton-pulse { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* Count-up animation helper */
+.count-up { display: inline-block; }
+
+─────────────────────────────────────
+FILE 5: src/main.jsx
+─────────────────────────────────────
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
+import App from './App'
+import { ThemeProvider } from './context/ThemeContext'
+import { AuthProvider } from './context/AuthContext'
+import './styles/globals.css'
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <ThemeProvider>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </ThemeProvider>
+    </BrowserRouter>
+  </React.StrictMode>
+)
+
+─────────────────────────────────────
+FILE 6: src/context/ThemeContext.jsx
+─────────────────────────────────────
+- createContext + ThemeProvider component
+- State: theme = 'light' | 'dark'
+- On mount: read localStorage key 'bloodconnect-theme', default 'light'
+- On theme change: toggle class 'dark' on document.documentElement
+- toggleTheme function: switches light↔dark, saves to localStorage
+- Export: ThemeContext, ThemeProvider, useTheme hook (custom hook)
+
+─────────────────────────────────────
+FILE 7: src/context/AuthContext.jsx
+─────────────────────────────────────
+- createContext + AuthProvider component
+- Mock auth state (no real API):
+  user = {
+    id: 1,
+    name: "Rahim Khan",
+    email: "donor@demo.com",
+    role: "donor",  // "donor" | "admin" | "hospital" | "seeker"
+    bloodGroup: "A+",
+    avatar: null,
+    isApproved: true
+  }
+- isAuthenticated = true (mock)
+- login(credentials) — sets mock user based on role
+- logout() — clears user state
+- Export: AuthContext, AuthProvider, useAuth hook
+- NOTE: No real fetch. All mock data for UI only.
+
+─────────────────────────────────────
+FILE 8: src/hooks/useTheme.js
+─────────────────────────────────────
+Re-export useTheme from ThemeContext for convenience:
+import { useContext } from 'react'
+import { ThemeContext } from '../context/ThemeContext'
+export const useTheme = () => useContext(ThemeContext)
+
+─────────────────────────────────────
+FILE 9: src/hooks/useAuth.js
+─────────────────────────────────────
+Re-export useAuth from AuthContext for convenience:
+import { useContext } from 'react'
+import { AuthContext } from '../context/AuthContext'
+export const useAuth = () => useContext(AuthContext)
+
+─────────────────────────────────────
+FILE 10: src/utils/constants.js
+─────────────────────────────────────
+Export these constants:
+
+export const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+
+export const BANGLADESH_DIVISIONS = [
+  'Dhaka', 'Chittagong', 'Rajshahi', 'Sylhet',
+  'Khulna', 'Barisal', 'Rangpur', 'Mymensingh'
+]
+
+export const BLOOD_GROUP_COLORS = {
+  'A+': 'red', 'A-': 'red',
+  'B+': 'blue', 'B-': 'blue',
+  'AB+': 'purple', 'AB-': 'purple',
+  'O+': 'green', 'O-': 'green'
+}
+
+export const URGENCY_LEVELS = {
+  emergency: { label: 'Emergency', color: 'red' },
+  urgent: { label: 'Urgent', color: 'orange' },
+  normal: { label: 'Normal', color: 'green' }
+}
+
+export const STATUS_COLORS = {
+  pending: 'yellow', approved: 'green', rejected: 'red',
+  completed: 'green', cancelled: 'gray', active: 'green',
+  suspended: 'red', matched: 'blue', fulfilled: 'green'
+}
+
+export const DEMO_CREDENTIALS = {
+  donor: { email: 'donor@demo.com', password: 'demo123', role: 'donor' },
+  admin: { email: 'admin@demo.com', password: 'admin123', role: 'admin' },
+  hospital: { email: 'hospital@demo.com', password: 'hosp123', role: 'hospital' },
+  seeker: { email: 'seeker@demo.com', password: 'seek123', role: 'seeker' }
+}
+
+export const DONATION_TYPES = ['Whole Blood', 'Platelets', 'Plasma', 'Double Red Cells']
+
+─────────────────────────────────────
+FILE 11: src/App.jsx
+─────────────────────────────────────
+React Router v6 with all routes. Import all page components lazily (React.lazy + Suspense).
+
+Routes:
+// Public / Guest
+'/'                        → pages/guest/Home
+'/about'                   → pages/guest/About
+'/contact'                 → pages/guest/Contact
+'/blog'                    → pages/guest/Blog
+'/blog/:id'                → pages/guest/BlogPost
+'/donors'                  → pages/guest/Donors
+'/donors/:id'              → pages/guest/DonorProfile
+'/faq'                     → pages/guest/FAQ
+'/eligibility'             → pages/guest/Eligibility
+'/why-donate'              → pages/guest/WhyDonate
+'/track-request'           → pages/guest/TrackRequest
+
+// Auth
+'/login'                   → pages/auth/Login
+'/register'                → pages/auth/Register
+
+// Donor Dashboard
+'/donor/dashboard'         → pages/donor/Dashboard
+'/donor/health'            → pages/donor/Health
+'/donor/voluntary'         → pages/donor/Voluntary
+'/donor/history'           → pages/donor/History
+'/donor/certificates'      → pages/donor/Certificates
+'/donor/chat'              → pages/donor/Chat
+'/donor/notifications'     → pages/donor/Notifications
+'/donor/profile'           → pages/donor/Profile
+
+// Admin Dashboard
+'/admin/dashboard'         → pages/admin/Dashboard
+'/admin/donors'            → pages/admin/Donors
+'/admin/hospitals'         → pages/admin/Hospitals
+'/admin/voluntary'         → pages/admin/Voluntary
+'/admin/blood-groups'      → pages/admin/BloodGroups
+'/admin/reports'           → pages/admin/Reports
+'/admin/announcements'     → pages/admin/Announcements
+'/admin/chat'              → pages/admin/Chat
+'/admin/notifications'     → pages/admin/Notifications
+'/admin/profile'           → pages/admin/Profile
+
+// Hospital Dashboard
+'/hospital/dashboard'      → pages/hospital/Dashboard
+'/hospital/donors'         → pages/hospital/Donors
+'/hospital/appointments'   → pages/hospital/Appointments
+'/hospital/requests'       → pages/hospital/Requests
+'/hospital/chat'           → pages/hospital/Chat
+'/hospital/notifications'  → pages/hospital/Notifications
+'/hospital/profile'        → pages/hospital/Profile
+
+// Seeker Portal
+'/seeker/request'          → pages/seeker/Request
+'/seeker/request/:id'      → pages/seeker/RequestDetails
+'/seeker/tracking'         → pages/seeker/Tracking
+'/seeker/chat'             → pages/seeker/Chat
+'/seeker/notifications'    → pages/seeker/Notifications
+'/seeker/profile'          → pages/seeker/Profile
+
+// 404
+'*'                        → pages/NotFound
+
+Suspense fallback: centered red heart pulse spinner div.
+
+─────────────────────────────────────
+FOLDER STRUCTURE to create:
+─────────────────────────────────────
+src/
+├── assets/images/          (empty, placeholder)
+├── components/
+│   ├── ui/
+│   │   ├── Button.jsx
+│   │   ├── Badge.jsx
+│   │   ├── Input.jsx
+│   │   ├── Select.jsx
+│   │   ├── Modal.jsx
+│   │   ├── Skeleton.jsx
+│   │   ├── Table.jsx
+│   │   ├── Pagination.jsx
+│   │   └── Toast.jsx
+│   ├── layout/
+│   │   ├── PublicNavbar.jsx      (placeholder — will be filled in Part 2)
+│   │   ├── PublicFooter.jsx      (placeholder — will be filled in Part 2)
+│   │   └── DashboardLayout.jsx   (placeholder — will be filled in Part 2)
+│   └── shared/
+│       ├── BloodGroupBadge.jsx   (placeholder — will be filled in Part 2)
+│       ├── StatCard.jsx          (placeholder — will be filled in Part 2)
+│       ├── DonorCard.jsx         (placeholder — will be filled in Part 2)
+│       ├── ThemeToggle.jsx       (placeholder — will be filled in Part 2)
+│       └── PageHeader.jsx        (placeholder — will be filled in Part 2)
+├── pages/
+│   ├── guest/    (all .jsx files, empty placeholder components)
+│   ├── auth/     (Login.jsx, Register.jsx — empty placeholder)
+│   ├── donor/    (all .jsx files — empty placeholder)
+│   ├── admin/    (all .jsx files — empty placeholder)
+│   ├── hospital/ (all .jsx files — empty placeholder)
+│   ├── seeker/   (all .jsx files including Profile.jsx — empty placeholder)
+│   └── NotFound.jsx
+├── context/
+│   ├── AuthContext.jsx
+│   └── ThemeContext.jsx
+├── hooks/
+│   ├── useAuth.js
+│   └── useTheme.js
+├── utils/
+│   └── constants.js
+├── styles/
+│   └── globals.css
+├── App.jsx
+└── main.jsx
+
+For placeholder components, just export a simple div:
+const PageName = () => <div className="p-8 text-gray-500">PageName — Coming soon</div>
+export default PageName
+
+STRICT DESIGN RULES (must follow):
+- rounded-md ONLY. NEVER rounded-xl or rounded-2xl
+- Colors: Primary #DC2626, dark bg #0F172A, gray scale only
+- Font: Inter
+- Dark mode: class-based dark: prefix
