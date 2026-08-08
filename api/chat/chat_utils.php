@@ -1,5 +1,5 @@
-﻿<?php
-require_once __DIR__ . '/../../config/cors.php';
+<?php
+require_once __DIR__ . '/../config/cors.php';
 /**
  * Chat Utility Functions
  * Implements permission matrix, context validation, conversation helpers, and rate limiting
@@ -397,3 +397,4 @@ function createChatNotification(PDO $conn, int $receiverId, string $senderName, 
     $service = new NotificationService($conn);
     $service->createChatNotification($receiverId, $senderName, $messageId);
 }
+

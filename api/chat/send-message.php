@@ -1,5 +1,5 @@
-﻿<?php
-require_once __DIR__ . '/../../config/cors.php';
+<?php
+require_once __DIR__ . '/../config/cors.php';
 /**
  * Send Chat Message
  * POST /api/chat/send-message.php
@@ -101,3 +101,4 @@ try {
     error_log('Send Message Error: ' . $e->getMessage());
     jsonResponse(500, ['success' => false, 'error' => 'Failed to send message']);
 }
+

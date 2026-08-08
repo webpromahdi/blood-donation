@@ -12,6 +12,7 @@ export default function Profile() {
   const { toast } = useToast()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [updatingPassword, setUpdatingPassword] = useState(false)
   const [stats, setStats] = useState({ requests: 0 })
   const [form, setForm] = useState({
     name: '',
@@ -20,6 +21,11 @@ export default function Profile() {
     division: '',
     district: '',
     address: ''
+  })
+  const [pwdForm, setPwdForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
   })
 
   useEffect(() => {
@@ -61,6 +67,36 @@ export default function Profile() {
       setSaving(false)
       toast('Profile updated successfully!', { type: 'success' })
     }, 1000)
+  }
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault()
+    if (!pwdForm.currentPassword || !pwdForm.newPassword || !pwdForm.confirmPassword) {
+      toast('Please fill all password fields', { type: 'error' })
+      return
+    }
+    if (pwdForm.newPassword !== pwdForm.confirmPassword) {
+      toast('New passwords do not match', { type: 'error' })
+      return
+    }
+    setUpdatingPassword(true)
+    try {
+      const res = await api.post('/seeker/change-password.php', {
+        current_password: pwdForm.currentPassword,
+        new_password: pwdForm.newPassword
+      })
+      if (res.success) {
+        toast('Password updated successfully', { type: 'success' })
+        setPwdForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
+      } else {
+        toast(res.message || 'Failed to update password', { type: 'error' })
+      }
+    } catch (err) {
+      console.error(err)
+      toast('Error updating password', { type: 'error' })
+    } finally {
+      setUpdatingPassword(false)
+    }
   }
 
   const handleChange = (k) => (e) => setForm({ ...form, [k]: e.target.value })
@@ -135,20 +171,20 @@ export default function Profile() {
           </form>
 
           {/* Security */}
-          <form className="rounded-md border border-gray-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+          <form onSubmit={handlePasswordChange} className="rounded-md border border-gray-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
             <h3 className="mb-6 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
               <Lock className="h-5 w-5 text-gray-400" /> Security Settings
             </h3>
             
             <div className="grid gap-5 sm:grid-cols-2">
-              <Input label="Current Password" type="password" placeholder="Enter current password" />
+              <Input label="Current Password" type="password" placeholder="Enter current password" value={pwdForm.currentPassword} onChange={e => setPwdForm({...pwdForm, currentPassword: e.target.value})} required />
               <div className="hidden sm:block"></div>
-              <Input label="New Password" type="password" placeholder="Enter new password" />
-              <Input label="Confirm New Password" type="password" placeholder="Confirm new password" />
+              <Input label="New Password" type="password" placeholder="Enter new password" value={pwdForm.newPassword} onChange={e => setPwdForm({...pwdForm, newPassword: e.target.value})} required />
+              <Input label="Confirm New Password" type="password" placeholder="Confirm new password" value={pwdForm.confirmPassword} onChange={e => setPwdForm({...pwdForm, confirmPassword: e.target.value})} required />
             </div>
 
             <div className="mt-6 flex justify-end">
-              <Button type="button" variant="outline">
+              <Button type="submit" variant="outline" disabled={updatingPassword} loading={updatingPassword}>
                 Update Password
               </Button>
             </div>

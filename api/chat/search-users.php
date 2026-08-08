@@ -1,5 +1,5 @@
-﻿<?php
-require_once __DIR__ . '/../../config/cors.php';
+<?php
+require_once __DIR__ . '/../config/cors.php';
 /**
  * API: Search Users for Chat
  * GET /api/chat/search-users.php
@@ -327,3 +327,4 @@ function formatUserForChat(array $user, string $contextLabel = ''): array
         'has_conversation' => false
     ];
 }
+

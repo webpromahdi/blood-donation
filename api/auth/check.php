@@ -1,5 +1,5 @@
-﻿<?php
-require_once __DIR__ . '/../../config/cors.php';
+<?php
+require_once __DIR__ . '/../config/cors.php';
 /**
  * Session Check Endpoint
  * GET /api/auth/check.php
@@ -77,3 +77,4 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
         'logged_in' => false
     ]);
 }
+

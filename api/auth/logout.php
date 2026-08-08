@@ -1,5 +1,5 @@
-﻿<?php
-require_once __DIR__ . '/../../config/cors.php';
+<?php
+require_once __DIR__ . '/../config/cors.php';
 /**
  * User Logout Endpoint
  * POST /api/auth/logout.php
@@ -37,3 +37,4 @@ echo json_encode([
     'success' => true,
     'message' => 'Logged out successfully'
 ]);
+

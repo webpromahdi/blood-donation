@@ -1,5 +1,5 @@
-﻿<?php
-require_once __DIR__ . '/../../config/cors.php';
+<?php
+require_once __DIR__ . '/../config/cors.php';
 /**
  * API: Mark as Read
  * POST /api/chat/mark-read.php
@@ -99,3 +99,4 @@ try {
     error_log('Mark Read Error: ' . $e->getMessage());
     jsonResponse(500, ['success' => false, 'error' => 'Failed to mark as read']);
 }
+

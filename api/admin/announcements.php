@@ -1,5 +1,5 @@
-﻿<?php
-require_once __DIR__ . '/../../config/cors.php';
+<?php
+require_once __DIR__ . '/../config/cors.php';
 /**
  * Admin Announcements Endpoint
  * GET /api/admin/announcements.php - List all announcements
@@ -236,3 +236,4 @@ function handleDelete($conn) {
         'message' => 'Announcement deleted successfully'
     ]);
 }
+

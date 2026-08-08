@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Search,
@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Input from "../../components/ui/Input";
 import Badge from "../../components/ui/Badge";
+import { api } from "../../utils/apiService";
 
 const CATEGORIES = ["All", "Stories", "News", "Tips & Health", "Research", "FAQ"];
 
@@ -136,8 +137,26 @@ function initials(name) {
 export default function Blog() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = POSTS.filter((post) => {
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const res = await api.get('/guest/blogs.php');
+        if (res.success) {
+          setPosts(res.blogs || []);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBlogs();
+  }, []);
+
+  const filtered = posts.filter((post) => {
     const matchesCategory =
       selectedCategory === "All" || post.category === selectedCategory;
     const matchesSearch = post.title
@@ -187,62 +206,66 @@ export default function Blog() {
         })}
       </div>
 
-      {filtered.length === 0 ? (
-        <p className="text-center text-gray-500 dark:text-slate-400 py-12">
-          No articles found. Try a different search or category.
-        </p>
+      {loading ? (
+        <div className="flex justify-center mt-10">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-red-600 border-t-transparent" />
+        </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map((post) => {
-            const Icon = CATEGORY_ICONS[post.category] || BookOpen;
-            return (
-              <div
-                key={post.id}
-                className="flex flex-col h-full border border-gray-200 dark:border-slate-700 rounded-md overflow-hidden bg-white dark:bg-slate-800"
-              >
-                <div className="h-48 bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/40 dark:to-slate-800 flex items-center justify-center">
-                  <Icon className="size-12 text-red-600 dark:text-red-400" />
-                </div>
-                <div className="p-5 flex flex-col flex-1">
-                  <div className="flex items-center justify-between">
-                    <Badge
-                      tone={CATEGORY_TONES[post.category] || "gray"}
-                      size="sm"
-                    >
-                      {post.category}
-                    </Badge>
-                    <span className="text-xs text-gray-400 inline-flex items-center gap-1">
-                      <Calendar className="size-3" />
-                      {post.date}
-                    </span>
+        <div className="mt-10 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          {filtered.length > 0 ? (
+            filtered.map((post) => {
+              const Icon = CATEGORY_ICONS[post.category] || BookOpen;
+              return (
+                <Link
+                  key={post.id}
+                  to={`/blog/${post.slug || post.id}`}
+                  className="group flex h-full flex-col overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm transition-all hover:shadow-[var(--shadow-card)] hover:-translate-y-1 dark:border-slate-700 dark:bg-slate-800"
+                >
+                  <div className="h-48 bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/40 dark:to-slate-800 flex items-center justify-center">
+                    <Icon className="size-12 text-red-600 dark:text-red-400" />
                   </div>
-                  <h2 className="font-semibold mt-2 line-clamp-2 text-gray-900 dark:text-slate-100">
-                    {post.title}
-                  </h2>
-                  <p className="text-sm text-gray-600 dark:text-slate-400 mt-2 line-clamp-3">
-                    {post.excerpt}
-                  </p>
-                  <div className="mt-auto pt-4 border-t border-gray-100 dark:border-slate-700 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="size-6 rounded-full bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-300 text-[10px] font-semibold flex items-center justify-center shrink-0">
-                        {initials(post.author)}
-                      </span>
-                      <span className="text-xs text-gray-600 dark:text-slate-400">
-                        {post.author} · {post.readTime}
+                  <div className="p-5 flex flex-col flex-1">
+                    <div className="flex items-center justify-between">
+                      <Badge
+                        tone={CATEGORY_TONES[post.category] || "gray"}
+                        size="sm"
+                      >
+                        {post.category}
+                      </Badge>
+                      <span className="text-xs text-gray-400 inline-flex items-center gap-1">
+                        <Calendar className="size-3" />
+                        {post.date}
                       </span>
                     </div>
-                    <Link
-                      to={`/blog/${post.id}`}
-                      className="text-red-600 text-sm inline-flex items-center gap-1 shrink-0"
-                    >
-                      Read More
-                      <ArrowRight className="size-4" />
-                    </Link>
+                    <h2 className="font-semibold mt-2 line-clamp-2 text-gray-900 dark:text-slate-100">
+                      {post.title}
+                    </h2>
+                    <p className="text-sm text-gray-600 dark:text-slate-400 mt-2 line-clamp-3">
+                      {post.excerpt}
+                    </p>
+                    <div className="mt-auto pt-4 border-t border-gray-100 dark:border-slate-700 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="size-6 rounded-full bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-300 text-[10px] font-semibold flex items-center justify-center shrink-0">
+                          {initials(post.author)}
+                        </span>
+                        <span className="text-xs text-gray-600 dark:text-slate-400">
+                          {post.author} · {post.readTime}
+                        </span>
+                      </div>
+                      <span className="text-red-600 text-sm inline-flex items-center gap-1 shrink-0">
+                        Read More
+                        <ArrowRight className="size-4" />
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </div>
-            );
-          })}
+                </Link>
+              );
+            })
+          ) : (
+            <p className="col-span-full text-center text-gray-500 dark:text-slate-400 py-12">
+              No articles found. Try a different search or category.
+            </p>
+          )}
         </div>
       )}
     </div>

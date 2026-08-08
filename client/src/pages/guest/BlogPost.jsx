@@ -1,4 +1,5 @@
-import { Link, useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import {
   Droplet,
   Calendar,
@@ -10,6 +11,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import Badge from "../../components/ui/Badge";
+import { api } from "../../utils/apiService";
 
 const RELATED = [
   {
@@ -31,7 +33,38 @@ const RELATED = [
 
 export default function BlogPost() {
   const { id } = useParams();
-  const title = "Why O-negative Blood is the Universal Lifeline";
+  const navigate = useNavigate();
+  const [post, setPost] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBlog = async () => {
+      try {
+        const res = await api.get('/guest/blog.php?slug=' + id);
+        if (res.success && res.blog) {
+          setPost(res.blog);
+        } else {
+          // not found
+          navigate('/blog', { replace: true });
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBlog();
+  }, [id, navigate]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-red-600 border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!post) return null;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
@@ -45,7 +78,7 @@ export default function BlogPost() {
         </Link>
         <span>/</span>
         <span className="text-gray-700 dark:text-slate-300 line-clamp-1">
-          {title}
+          {post.title}
         </span>
       </nav>
 
@@ -55,89 +88,42 @@ export default function BlogPost() {
 
       <div className="flex items-center gap-4 flex-wrap text-sm text-gray-500 dark:text-slate-400 mb-4">
         <Badge tone="red" size="sm">
-          Research
+          {post.tag}
         </Badge>
         <span className="inline-flex items-center gap-1">
           <Calendar className="size-4" />
-          Jul 15, 2026
+          {post.date}
         </span>
         <span className="inline-flex items-center gap-1">
-          <Clock className="size-4" />8 min read
+          <Clock className="size-4" />
+          {post.readTime}
         </span>
-        {id ? (
-          <span className="text-xs text-gray-400">Article #{id}</span>
-        ) : null}
       </div>
 
-      <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-100 mb-6">
-        {title}
+      <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-slate-100 mb-6 leading-tight">
+        {post.title}
       </h1>
 
-      <div className="flex items-center gap-3 mb-8 pb-8 border-b border-gray-200 dark:border-slate-700">
-        <span className="size-10 rounded-full bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-300 text-sm font-semibold flex items-center justify-center shrink-0">
-          FK
-        </span>
+      <div className="flex items-center gap-3 border-y border-gray-100 dark:border-slate-700 py-4 mb-8">
+        <div className="size-10 rounded-full bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-300 font-bold flex items-center justify-center">
+          {post.author ? post.author.substring(0, 2).toUpperCase() : 'B'}
+        </div>
         <div>
-          <p className="font-medium text-gray-900 dark:text-slate-100">
-            Dr. Farhana Kabir
+          <p className="font-semibold text-gray-900 dark:text-slate-100">
+            {post.author}
           </p>
           <p className="text-xs text-gray-500 dark:text-slate-400">
-            Hematologist · Jul 15, 2026
+            Medical Researcher
           </p>
         </div>
       </div>
 
-      <article className="space-y-4 text-gray-700 dark:text-slate-300 leading-relaxed">
-        <p>
-          In emergency rooms across Bangladesh, from Dhaka Medical College to
-          rural upazila health complexes, one blood group is requested more
-          urgently than any other during a crisis: O-negative. Because it can be
-          safely transfused to patients of almost any blood type, O-negative is
-          the group doctors reach for when there is no time to cross-match.
+      <div className="prose prose-red dark:prose-invert max-w-none mb-12 text-gray-700 dark:text-slate-300">
+        <p className="lead text-xl text-gray-600 dark:text-slate-400 mb-6">
+          {post.excerpt}
         </p>
-        <p>
-          Yet O-negative donors make up only a small fraction of the population.
-          When a road accident victim arrives unconscious on the Dhaka-Chattogram
-          highway, or a mother suffers heavy bleeding during childbirth, that
-          precious universal supply is often the difference between life and
-          death.
-        </p>
-
-        <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100 mt-8">
-          Why "Universal Donor" Really Matters in a Crisis
-        </h2>
-        <p>
-          O-negative red cells carry neither A, B, nor Rh antigens, so a
-          recipient's immune system will not attack them. In a trauma bay where
-          seconds count, transfusion teams cannot always wait for lab results.
-          Keeping a ready reserve of O-negative units allows hospitals to begin
-          resuscitation immediately, then switch to matched blood once testing is
-          complete.
-        </p>
-
-        <blockquote className="border-l-4 border-red-600 pl-4 italic text-gray-600 dark:text-slate-400">
-          "A single O-negative donor in Dhaka can stabilise a patient long enough
-          for us to find a perfect match. That is why we treat every O-negative
-          donation as a strategic reserve for the whole city."
-        </blockquote>
-
-        <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100 mt-8">
-          How You Can Help Bridge the Gap
-        </h2>
-        <p>
-          If you are O-negative, you hold a rare and vital resource. Donating
-          every four months, staying registered on BloodConnect, and keeping your
-          contact details current means emergency teams can reach you the moment a
-          patient needs universal blood. Eating iron-rich foods like daal, liver,
-          and leafy shak between donations helps keep you eligible.
-        </p>
-        <p>
-          Even if you are not O-negative, encouraging friends and family to learn
-          their blood group and register as donors strengthens the entire
-          network. Every registered donor shortens the search when a life hangs in
-          the balance.
-        </p>
-      </article>
+        <div dangerouslySetInnerHTML={{ __html: post.content }} />
+      </div>
 
       <div className="mt-10 pt-6 border-t border-gray-200 dark:border-slate-700">
         <p className="font-medium text-gray-900 dark:text-slate-100 mb-3">

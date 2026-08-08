@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -14,28 +14,7 @@ import {
 import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
 import BloodGroupBadge from '../../components/shared/BloodGroupBadge'
-
-const DONOR = {
-  name: 'Rahim Khan',
-  initials: 'RK',
-  group: 'A+',
-  area: 'Dhanmondi',
-  city: 'Dhaka',
-  division: 'Dhaka',
-  totalDonations: 12,
-  livesSaved: 36,
-  memberSince: 2021,
-  age: 29,
-  available: true,
-}
-
-const HISTORY = [
-  { hospital: 'Dhaka Medical College Hospital', date: '12 Jan 2026' },
-  { hospital: 'Square Hospital, Panthapath', date: '03 Sep 2025' },
-  { hospital: 'United Hospital, Gulshan', date: '18 Apr 2025' },
-  { hospital: 'Popular Diagnostic, Dhanmondi', date: '27 Nov 2024' },
-  { hospital: 'Ibn Sina Hospital, Kallyanpur', date: '09 Feb 2021' },
-]
+import { api } from '../../utils/apiService'
 
 const BADGES = [
   { name: 'First Drop', icon: Award, tone: 'text-red-600', earned: true },
@@ -67,8 +46,51 @@ function InfoRow({ label, value }) {
 }
 
 export default function DonorProfile() {
-  useParams()
+  const { id } = useParams()
   const [tab, setTab] = useState('Overview')
+  
+  const [donor, setDonor] = useState(null)
+  const [history, setHistory] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await api.get(`/guest/donor-profile.php?id=${id}`)
+        if (res.success) {
+          setDonor(res.donor)
+          setHistory(res.history || [])
+        }
+      } catch (err) {
+        setError('Donor not found or profile is private.')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchProfile()
+  }, [id])
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-20 text-center">
+        <div className="animate-pulse flex flex-col items-center">
+          <div className="h-24 w-24 rounded-full bg-gray-200 dark:bg-slate-700 mb-4"></div>
+          <div className="h-6 w-48 rounded bg-gray-200 dark:bg-slate-700 mb-2"></div>
+          <div className="h-4 w-32 rounded bg-gray-200 dark:bg-slate-700"></div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !donor) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-20 text-center">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-slate-100 mb-4">{error || 'Donor not found'}</h2>
+        <Button as={Link} to="/donors" variant="secondary">Back to Search</Button>
+      </div>
+    )
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
@@ -85,30 +107,30 @@ export default function DonorProfile() {
         <aside className="lg:col-span-1">
           <div className="rounded-md border border-gray-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
             <div className="mx-auto flex size-24 items-center justify-center rounded-full bg-red-100 text-2xl font-bold text-red-700 dark:bg-red-950/60 dark:text-red-300">
-              {DONOR.initials}
+              {donor.initials}
             </div>
             <div className="mt-4 flex justify-center">
-              <BloodGroupBadge group={DONOR.group} size="lg" />
+              <BloodGroupBadge group={donor.bloodGroup} size="lg" />
             </div>
             <h2 className="mt-4 text-center text-xl font-bold text-gray-900 dark:text-slate-100">
-              {DONOR.name}
+              {donor.name}
             </h2>
             <p className="mt-1 flex items-center justify-center gap-1 text-sm text-gray-500 dark:text-slate-400">
               <MapPin className="h-4 w-4" />
-              {DONOR.area}, {DONOR.city}
+              {donor.area}, {donor.city}
             </p>
-            {DONOR.available && (
+            {donor.available && (
               <div className="mt-3 flex justify-center">
-                <Badge variant="success" dot>
+                <Badge tone="success" dot>
                   Available to Donate
                 </Badge>
               </div>
             )}
 
             <div className="mt-6 grid grid-cols-3 gap-2">
-              <StatCard label="Total Donations" value={DONOR.totalDonations} />
-              <StatCard label="Lives Saved" value={DONOR.livesSaved} />
-              <StatCard label="Member Since" value={DONOR.memberSince} />
+              <StatCard label="Total Donations" value={donor.totalDonations} />
+              <StatCard label="Lives Saved" value={donor.livesSaved} />
+              <StatCard label="Member Since" value={donor.memberSince} />
             </div>
 
             <Button variant="primary" fullWidth className="mt-6">
@@ -149,23 +171,22 @@ export default function DonorProfile() {
             <div className="space-y-6">
               <div className="space-y-3 text-sm leading-relaxed text-gray-600 dark:text-slate-300">
                 <p>
-                  Rahim is a regular voluntary blood donor based in Dhanmondi, Dhaka. Over the
-                  past five years he has donated whenever his blood type was urgently needed,
-                  responding to emergency requests across the capital at all hours.
+                  {donor.name.split(' ')[0]} is a regular voluntary blood donor based in {donor.area}, {donor.city}. Over the
+                  past few years they have donated whenever their blood type was urgently needed,
+                  responding to emergency requests across the city.
                 </p>
                 <p>
-                  He began donating after losing a close relative who could not find a matching
-                  donor in time. That experience turned him into a committed advocate for
-                  voluntary donation, and he now encourages friends and colleagues to register
+                  They began donating to help the community and turn into a committed advocate for
+                  voluntary donation, and now encourages friends and colleagues to register
                   with BloodConnect.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <InfoRow label="Blood Group" value={DONOR.group} />
-                <InfoRow label="Age" value={`${DONOR.age} years`} />
-                <InfoRow label="Division" value={DONOR.division} />
-                <InfoRow label="Total Donations" value={DONOR.totalDonations} />
+                <InfoRow label="Blood Group" value={donor.bloodGroup} />
+                <InfoRow label="Age" value={`${donor.age} years`} />
+                <InfoRow label="Division" value={donor.division} />
+                <InfoRow label="Total Donations" value={donor.totalDonations} />
                 <InfoRow label="Languages" value="Bangla / English" />
               </div>
 
@@ -175,9 +196,8 @@ export default function DonorProfile() {
                   Donation Facts
                 </h3>
                 <ul className="space-y-2 text-sm text-gray-600 dark:text-slate-300">
-                  <li>Each donation of A+ blood can help save up to 3 lives.</li>
-                  <li>He can safely donate again 90 days after his last donation.</li>
-                  <li>His fastest response to an emergency request was under 40 minutes.</li>
+                  <li>Each donation of {donor.bloodGroup} blood can help save up to 3 lives.</li>
+                  <li>They can safely donate again 90 days after their last donation.</li>
                 </ul>
               </div>
             </div>
@@ -185,25 +205,31 @@ export default function DonorProfile() {
 
           {tab === 'Donation History' && (
             <ul className="space-y-4">
-              {HISTORY.map((item, idx) => (
-                <li key={idx} className="flex gap-4">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-950/60">
-                    <Droplet className="h-4 w-4 text-red-600 dark:text-red-300" fill="currentColor" />
-                  </div>
-                  <div className="flex flex-1 flex-wrap items-center justify-between gap-2 border-b border-gray-100 pb-4 dark:border-slate-800">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-slate-100">
-                        {item.hospital}
-                      </p>
-                      <p className="flex items-center gap-1 text-xs text-gray-500 dark:text-slate-400">
-                        <Calendar className="h-3 w-3" />
-                        {item.date}
-                      </p>
+              {history.length > 0 ? (
+                history.map((item, idx) => (
+                  <li key={idx} className="flex gap-4">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-950/60">
+                      <Droplet className="h-4 w-4 text-red-600 dark:text-red-300" fill="currentColor" />
                     </div>
-                    <Badge variant="success">Completed</Badge>
-                  </div>
+                    <div className="flex flex-1 flex-wrap items-center justify-between gap-2 border-b border-gray-100 pb-4 dark:border-slate-800">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-slate-100">
+                          {item.hospital}
+                        </p>
+                        <p className="flex items-center gap-1 text-xs text-gray-500 dark:text-slate-400">
+                          <Calendar className="h-3 w-3" />
+                          {item.date}
+                        </p>
+                      </div>
+                      <Badge tone="success">Completed</Badge>
+                    </div>
+                  </li>
+                ))
+              ) : (
+                <li className="py-5 text-gray-500 dark:text-slate-400">
+                  No donations recorded yet.
                 </li>
-              ))}
+              )}
             </ul>
           )}
 

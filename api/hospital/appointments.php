@@ -1,21 +1,20 @@
-﻿<?php
-require_once __DIR__ . '/../../config/cors.php';
+<?php
+require_once __DIR__ . '/../config/cors.php';
 /**
  * Hospital Appointments Endpoint
- * GET /api/hospital/appointments.php
- * Returns donation appointments for the hospital's requests + approved voluntary donations
+ * GET /api/hospital/appointments.php - List appointments
+ * PUT /api/hospital/appointments.php - Update appointment status
  * 
  * Normalized Schema: Uses hospitals table, donations -> donors -> users, blood_groups
  * Also includes voluntary_donations assigned to this hospital
  */
-
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+if ($_SERVER['REQUEST_METHOD'] !== 'GET' && $_SERVER['REQUEST_METHOD'] !== 'PUT') {
     http_response_code(405);
     echo json_encode(['success' => false, 'message' => 'Method not allowed']);
     exit;
@@ -38,6 +37,63 @@ $conn = $database->getConnection();
 if (!$conn) {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Database connection failed']);
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
+    $data = json_decode(file_get_contents("php://input"));
+    $idStr = isset($data->id) ? $data->id : '';
+    $status = isset($data->status) ? $data->status : '';
+
+    if (!$idStr || !in_array($status, ['completed', 'cancelled'])) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Invalid data']);
+        exit;
+    }
+
+    $type = substr($idStr, 0, 3);
+    $numericId = (int)substr($idStr, 3);
+
+    try {
+        $conn->beginTransaction();
+
+        if ($type === 'APT') {
+            // Update donation status
+            $stmt = $conn->prepare("UPDATE donations SET status = ?, ".($status === 'completed' ? 'completed_at = CURRENT_TIMESTAMP' : 'cancelled_at = CURRENT_TIMESTAMP')." WHERE id = ?");
+            $stmt->execute([$status, $numericId]);
+            
+            if ($status === 'completed') {
+                // Update donor total_donations
+                $stmtDonor = $conn->prepare("UPDATE donors d JOIN donations dn ON d.id = dn.donor_id SET d.total_donations = d.total_donations + 1, d.last_donation_date = CURRENT_DATE, d.is_available = 1 WHERE dn.id = ?");
+                $stmtDonor->execute([$numericId]);
+            } else {
+                $stmtDonor = $conn->prepare("UPDATE donors d JOIN donations dn ON d.id = dn.donor_id SET d.is_available = 1 WHERE dn.id = ?");
+                $stmtDonor->execute([$numericId]);
+            }
+        } elseif ($type === 'VOL') {
+            // Update voluntary_donations
+            $stmt = $conn->prepare("UPDATE voluntary_donations SET status = ? WHERE id = ?");
+            $stmt->execute([$status, $numericId]);
+            
+            if ($status === 'completed') {
+                // Update donor total_donations
+                $stmtDonor = $conn->prepare("UPDATE donors d JOIN voluntary_donations v ON d.id = v.donor_id SET d.total_donations = d.total_donations + 1, d.last_donation_date = CURRENT_DATE, d.is_available = 1 WHERE v.id = ?");
+                $stmtDonor->execute([$numericId]);
+            } else {
+                $stmtDonor = $conn->prepare("UPDATE donors d JOIN voluntary_donations v ON d.id = v.donor_id SET d.is_available = 1 WHERE v.id = ?");
+                $stmtDonor->execute([$numericId]);
+            }
+        } else {
+            throw new Exception("Invalid ID format");
+        }
+
+        $conn->commit();
+        echo json_encode(['success' => true]);
+    } catch (Exception $e) {
+        $conn->rollBack();
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Failed to update status: ' . $e->getMessage()]);
+    }
     exit;
 }
 
@@ -265,39 +321,25 @@ try {
             'donation_status' => $apt['status'],
             'date' => $apt['scheduled_date'] ?? $apt['availability_date'],
             'time' => $displayTime,
-            'preferred_time' => $apt['preferred_time'],
             'notes' => $apt['notes'],
             'accepted_at' => $apt['approved_at'],
             'started_at' => null,
             'reached_at' => null,
-            'completed_at' => $apt['status'] === 'completed' ? $apt['scheduled_date'] : null,
+            'completed_at' => null,
             'sort_date' => $apt['created_at']
         ];
     }, $voluntaryAppointments);
 
-    // Merge both arrays
+    // Combine and sort by date descending
     $allAppointments = array_merge($formattedAppointments, $formattedVoluntary);
-
-    // Sort by date (most recent first)
+    
     usort($allAppointments, function($a, $b) {
-        return strtotime($b['sort_date'] ?? $b['date']) - strtotime($a['sort_date'] ?? $a['date']);
+        return strtotime($b['sort_date']) - strtotime($a['sort_date']);
     });
-
-    // Calculate stats (including voluntary)
-    $stats = [
-        'total' => count($allAppointments),
-        'confirmed' => count(array_filter($allAppointments, fn($a) => $a['status'] === 'Confirmed')),
-        'pending' => count(array_filter($allAppointments, fn($a) => $a['status'] === 'Pending')),
-        'completed' => count(array_filter($allAppointments, fn($a) => $a['status'] === 'Completed')),
-        'in_progress' => count(array_filter($allAppointments, fn($a) => $a['status'] === 'In Progress')),
-        'voluntary' => count($formattedVoluntary),
-        'request_based' => count($formattedAppointments)
-    ];
 
     echo json_encode([
         'success' => true,
-        'appointments' => $allAppointments,
-        'stats' => $stats
+        'appointments' => $allAppointments
     ]);
 
 } catch (PDOException $e) {

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Search, SlidersHorizontal } from 'lucide-react'
 import Input from '../../components/ui/Input'
@@ -7,9 +7,7 @@ import Button from '../../components/ui/Button'
 import Pagination from '../../components/ui/Pagination'
 import DonorCard from '../../components/shared/DonorCard'
 import { BLOOD_GROUPS, BANGLADESH_DIVISIONS } from '../../utils/constants'
-import { DONORS } from '../../utils/mockData'
-
-const PER_PAGE = 6
+import { api } from '../../utils/apiService'
 
 export default function Donors() {
   const [searchParams] = useSearchParams()
@@ -18,20 +16,44 @@ export default function Donors() {
   const [division, setDivision] = useState('')
   const [onlyAvailable, setOnlyAvailable] = useState(false)
   const [page, setPage] = useState(1)
+  
+  const [donors, setDonors] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
 
-  const filtered = useMemo(() => {
-    return DONORS.filter((d) => {
-      if (query && !d.name.toLowerCase().includes(query.toLowerCase())) return false
-      if (group && d.bloodGroup !== group) return false
-      if (division && d.division !== division) return false
-      if (onlyAvailable && !d.available) return false
-      return true
-    })
-  }, [query, group, division, onlyAvailable])
+  // Fetch donors whenever filters or page change
+  useEffect(() => {
+    const fetchDonors = async () => {
+      setLoading(true)
+      try {
+        const params = new URLSearchParams()
+        params.append('page', page)
+        if (query) params.append('query', query)
+        if (group) params.append('group', group)
+        if (division) params.append('division', division)
+        if (onlyAvailable) params.append('available', '1')
 
-  const totalPages = Math.ceil(filtered.length / PER_PAGE)
-  const current = Math.min(page, Math.max(totalPages, 1))
-  const shown = filtered.slice((current - 1) * PER_PAGE, current * PER_PAGE)
+        const res = await api.get(`/guest/donors.php?${params.toString()}`)
+        if (res.success) {
+          setDonors(res.donors || [])
+          setTotalPages(res.totalPages || 1)
+          setTotalCount(res.total || 0)
+        }
+      } catch (error) {
+        console.error("Failed to fetch donors:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    // Debounce the fetch a little to avoid too many requests while typing
+    const delayDebounceFn = setTimeout(() => {
+      fetchDonors()
+    }, 300)
+
+    return () => clearTimeout(delayDebounceFn)
+  }, [query, group, division, onlyAvailable, page])
 
   const reset = () => {
     setQuery('')
@@ -48,7 +70,7 @@ export default function Donors() {
           Find a blood donor
         </h1>
         <p className="mt-2 text-gray-600 dark:text-slate-300">
-          Search {DONORS.length}+ verified voluntary donors across Bangladesh. Filter
+          Search verified voluntary donors across Bangladesh. Filter
           by blood group, division, and availability.
         </p>
       </div>
@@ -113,24 +135,34 @@ export default function Donors() {
           <p className="mb-4 text-sm text-gray-500 dark:text-slate-400">
             Showing{' '}
             <span className="font-semibold text-gray-900 dark:text-slate-100">
-              {filtered.length}
+              {totalCount}
             </span>{' '}
             donors
           </p>
-          {shown.length === 0 ? (
+          
+          {loading ? (
+            <div className="rounded-md border border-dashed border-gray-300 py-20 text-center text-gray-400 dark:border-slate-700 dark:text-slate-500">
+              Loading donors...
+            </div>
+          ) : donors.length === 0 ? (
             <div className="rounded-md border border-dashed border-gray-300 py-20 text-center text-gray-400 dark:border-slate-700 dark:text-slate-500">
               No donors match your filters.
             </div>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {shown.map((donor) => (
-                <DonorCard key={donor.id} donor={donor} />
-              ))}
-            </div>
+            <>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {donors.map((donor) => (
+                  <DonorCard key={donor.id} donor={donor} />
+                ))}
+              </div>
+              
+              {totalPages > 1 && (
+                <div className="mt-8">
+                  <Pagination page={page} totalPages={totalPages} onChange={setPage} />
+                </div>
+              )}
+            </>
           )}
-          <div className="mt-8">
-            <Pagination page={current} totalPages={totalPages} onChange={setPage} />
-          </div>
         </div>
       </div>
     </div>

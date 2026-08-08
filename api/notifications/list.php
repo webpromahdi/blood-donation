@@ -1,5 +1,5 @@
-﻿<?php
-require_once __DIR__ . '/../../config/cors.php';
+<?php
+require_once __DIR__ . '/../config/cors.php';
 /**
  * Get Notifications List
  * GET /api/notifications/list.php
@@ -95,7 +95,7 @@ try {
         $config = $typeConfig[$n['type']] ?? $typeConfig['info'];
         
         // Check if emergency (title starts with emoji or contains URGENT)
-        $isEmergency = strpos($n['title'], '🚨') !== false || strpos($n['message'], 'URGENT') !== false;
+        $isEmergency = strpos($n['title'], '??') !== false || strpos($n['message'], 'URGENT') !== false;
         if ($isEmergency) {
             $config = ['icon' => 'alert-octagon', 'iconBg' => 'bg-red-200', 'iconColor' => 'text-red-700'];
         }
@@ -150,3 +150,4 @@ try {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Failed to fetch notifications']);
 }
+

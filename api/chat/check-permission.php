@@ -1,5 +1,5 @@
-﻿<?php
-require_once __DIR__ . '/../../config/cors.php';
+<?php
+require_once __DIR__ . '/../config/cors.php';
 /**
  * API: Check Chat Permission (Pre-flight)
  * GET /api/chat/check-permission.php
@@ -81,3 +81,4 @@ try {
     error_log('Check Permission Error: ' . $e->getMessage());
     jsonResponse(500, ['success' => false, 'error' => 'Failed to check permission']);
 }
+

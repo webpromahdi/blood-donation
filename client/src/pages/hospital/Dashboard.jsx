@@ -26,6 +26,7 @@ export default function HospitalDashboard() {
   const [requests, setRequests] = useState([])
   const [appointments, setAppointments] = useState([])
   const [profile, setProfile] = useState(null)
+  const [inventory, setInventory] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -35,10 +36,11 @@ export default function HospitalDashboard() {
   const fetchDashboardData = async () => {
     setLoading(true)
     try {
-      const [reqRes, aptRes, profRes] = await Promise.all([
+      const [reqRes, aptRes, profRes, invRes] = await Promise.all([
         api.get('/hospital/requests.php'),
         api.get('/hospital/appointments.php'),
-        api.get('/hospital/profile.php')
+        api.get('/hospital/profile.php'),
+        api.get('/hospital/inventory.php')
       ])
 
       if (reqRes.success) {
@@ -49,6 +51,9 @@ export default function HospitalDashboard() {
       }
       if (profRes.success) {
         setProfile(profRes.profile)
+      }
+      if (invRes.success) {
+        setInventory(invRes.inventory || [])
       }
     } catch (err) {
       console.error('Failed to load dashboard data:', err)
@@ -66,24 +71,21 @@ export default function HospitalDashboard() {
     return aptDate === today
   })
 
-  // Simulated inventory levels (no real API for hospital inventory yet)
-  const BLOOD_INVENTORY = [
-    { group: 'A+', units: 45 },
-    { group: 'A-', units: 12 },
-    { group: 'B+', units: 58 },
-    { group: 'B-', units: 8 },
-    { group: 'AB+', units: 22 },
-    { group: 'AB-', units: 5 },
-    { group: 'O+', units: 84 },
-    { group: 'O-', units: 14 },
-  ]
+  const updateInventory = async (bgId, units) => {
+    try {
+      setInventory(prev => prev.map(b => b.blood_group_id === bgId ? { ...b, units } : b))
+      await api.put('/hospital/inventory.php', { blood_group_id: bgId, units })
+    } catch (err) {
+      console.error('Failed to update inventory', err)
+    }
+  }
 
   const collectionData = {
-    labels: BLOOD_INVENTORY.map(b => b.group),
+    labels: inventory.map(b => b.blood_group),
     datasets: [
       {
         label: 'Units in Stock',
-        data: BLOOD_INVENTORY.map(b => b.units),
+        data: inventory.map(b => b.units),
         backgroundColor: '#DC2626',
         borderRadius: 4,
       },
@@ -169,11 +171,11 @@ export default function HospitalDashboard() {
             Blood stock levels (Estimated)
           </h3>
           <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {BLOOD_INVENTORY.map((b) => {
+            {inventory.map((b) => {
               const low = b.units < 15
               return (
                 <div
-                  key={b.group}
+                  key={b.blood_group_id}
                   className={`rounded-md border p-4 ${
                     low
                       ? 'border-red-200 bg-red-50 dark:border-red-900/60 dark:bg-red-950/30'
@@ -181,13 +183,18 @@ export default function HospitalDashboard() {
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <BloodGroupBadge group={b.group} size="sm" showIcon={false} />
+                    <BloodGroupBadge group={b.blood_group} size="sm" showIcon={false} />
                     {low && <AlertTriangle className="h-4 w-4 text-red-500" title="Low stock" />}
                   </div>
-                  <p className="mt-3 text-2xl font-bold text-gray-900 dark:text-slate-100">
-                    {b.units}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-slate-400">units</p>
+                  <input
+                    type="number"
+                    min="0"
+                    value={b.units}
+                    onChange={(e) => setInventory(prev => prev.map(inv => inv.blood_group_id === b.blood_group_id ? { ...inv, units: parseInt(e.target.value) || 0 } : inv))}
+                    onBlur={(e) => updateInventory(b.blood_group_id, parseInt(e.target.value) || 0)}
+                    className="mt-3 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-xl font-bold text-gray-900 text-center dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 p-1"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-slate-400 text-center mt-1">units</p>
                 </div>
               )
             })}

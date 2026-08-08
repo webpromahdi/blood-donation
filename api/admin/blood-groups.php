@@ -1,5 +1,5 @@
-﻿<?php
-require_once __DIR__ . '/../../config/cors.php';
+<?php
+require_once __DIR__ . '/../config/cors.php';
 /**
  * Admin Blood Groups Stats and Donors Endpoint
  * GET /api/admin/blood-groups.php
@@ -140,3 +140,4 @@ try {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Failed to fetch blood group data']);
 }
+

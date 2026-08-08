@@ -89,11 +89,19 @@ export default function Profile() {
     }
     setSaving(true)
     
-    // As the backend doesn't have an update endpoint yet, we mock the success
-    setTimeout(() => {
+    try {
+      const res = await api.put('/hospital/profile.php', form)
+      if (res.success) {
+        toast('Hospital profile updated successfully.', { type: 'success' })
+      } else {
+        toast(res.message || 'Failed to update profile', { type: 'error' })
+      }
+    } catch (err) {
+      console.error(err)
+      toast('An error occurred while updating profile', { type: 'error' })
+    } finally {
       setSaving(false)
-      toast('Hospital profile updated successfully.', { type: 'success' })
-    }, 1500)
+    }
   }
 
   if (loadingData) {

@@ -1,5 +1,5 @@
-﻿<?php
-require_once __DIR__ . '/../../config/cors.php';
+<?php
+require_once __DIR__ . '/../config/cors.php';
 /**
  * Get Unread Notification Count
  * GET /api/notifications/unread-count.php
@@ -52,3 +52,4 @@ try {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Failed to fetch unread count']);
 }
+

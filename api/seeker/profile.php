@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../config/cors.php';
+require_once __DIR__ . '/../config/cors.php';
 /**
  * Seeker Profile & Stats Endpoint
  * GET /api/seeker/profile.php
@@ -81,3 +81,4 @@ try {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Failed to fetch profile']);
 }
+

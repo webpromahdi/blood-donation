@@ -1,5 +1,5 @@
-﻿<?php
-require_once __DIR__ . '/../../config/cors.php';
+<?php
+require_once __DIR__ . '/../config/cors.php';
 /**
  * Mark All Notifications as Read
  * POST /api/notifications/mark-all-read.php
@@ -58,3 +58,4 @@ try {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Failed to mark notifications as read']);
 }
+

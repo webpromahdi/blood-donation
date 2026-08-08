@@ -1,5 +1,5 @@
-﻿<?php
-require_once __DIR__ . '/../../config/cors.php';
+<?php
+require_once __DIR__ . '/../config/cors.php';
 /**
  * Get Chat Conversations List
  * GET /api/chat/conversations.php
@@ -137,3 +137,4 @@ try {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Failed to fetch conversations']);
 }
+

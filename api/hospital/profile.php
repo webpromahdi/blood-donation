@@ -1,19 +1,19 @@
-﻿<?php
-require_once __DIR__ . '/../../config/cors.php';
+<?php
+require_once __DIR__ . '/../config/cors.php';
 /**
  * Hospital Profile & Stats Endpoint
- * GET /api/hospital/profile.php
+ * GET /api/hospital/profile.php - Get profile & stats
+ * PUT /api/hospital/profile.php - Update profile
  * 
  * Normalized Schema: JOINs users + hospitals tables
  */
-
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+if ($_SERVER['REQUEST_METHOD'] !== 'GET' && $_SERVER['REQUEST_METHOD'] !== 'PUT') {
     http_response_code(405);
     echo json_encode(['success' => false, 'message' => 'Method not allowed']);
     exit;
@@ -24,10 +24,6 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../middleware/auth.php';
 
 $user = requireAuth(['hospital']);
-
-// Note: Profile endpoint returns status for dashboard to check, so we don't block here
-// But we do include status in response
-
 $userId = $_SESSION['user_id'];
 
 $database = new Database();
@@ -39,6 +35,56 @@ if (!$conn) {
     exit;
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
+    // Handle Profile Update
+    $data = json_decode(file_get_contents("php://input"));
+    
+    if (empty($data->name) || empty($data->email) || empty($data->registration_number) || empty($data->city) || empty($data->address)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Required fields missing']);
+        exit;
+    }
+
+    try {
+        $conn->beginTransaction();
+
+        // Update users table (name, email, phone)
+        $stmtUser = $conn->prepare("UPDATE users SET name = ?, email = ?, phone = ? WHERE id = ?");
+        $stmtUser->execute([
+            $data->name,
+            $data->email,
+            $data->phone ?? null,
+            $userId
+        ]);
+
+        // Update hospitals table
+        $stmtHosp = $conn->prepare("UPDATE hospitals SET registration_number = ?, city = ?, address = ?, website = ?, contact_person = ? WHERE user_id = ?");
+        $stmtHosp->execute([
+            $data->registration_number,
+            $data->city,
+            $data->address,
+            $data->website ?? null,
+            $data->contact_person ?? null,
+            $userId
+        ]);
+
+        $conn->commit();
+        echo json_encode(['success' => true, 'message' => 'Profile updated successfully']);
+    } catch (PDOException $e) {
+        $conn->rollBack();
+        error_log("Hospital Profile Update Error: " . $e->getMessage());
+        http_response_code(500);
+        // Check for email uniqueness error
+        if ($e->getCode() == 23000) {
+            echo json_encode(['success' => false, 'message' => 'Email already exists']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Failed to update profile']);
+        }
+    }
+    exit;
+}
+
+// Handle GET Profile
 try {
     // Get hospital profile including status - JOIN users and hospitals tables
     $stmt = $conn->prepare("
@@ -63,7 +109,6 @@ try {
     // Get account status - return early if pending
     $accountStatus = $hospital['status'] ?? 'pending';
     
-    // If account is pending, return limited profile with status only
     if ($accountStatus !== 'approved') {
         echo json_encode([
             'success' => true,
@@ -81,8 +126,6 @@ try {
         exit;
     }
 
-    // Get request statistics - use requester_id + requester_type
-    // Note: requester_id references users.id, not hospitals.id
     $stmt = $conn->prepare("SELECT 
         COUNT(*) as total,
         SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
@@ -93,7 +136,6 @@ try {
     $stmt->execute([$userId]);
     $stats = $stmt->fetch();
 
-    // Get available donors count (approved donors)
     $stmt = $conn->prepare("
         SELECT COUNT(DISTINCT d.id) as count 
         FROM donors d

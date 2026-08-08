@@ -1,5 +1,5 @@
-﻿<?php
-require_once __DIR__ . '/../../config/cors.php';
+<?php
+require_once __DIR__ . '/../config/cors.php';
 /**
  * Seeker List Requests Endpoint
  * GET /api/seeker/requests.php
@@ -155,3 +155,4 @@ function getLifecycleStatus($requestStatus, $donationStatus)
 
     return $requestStatus;
 }
+

@@ -1,5 +1,5 @@
-﻿<?php
-require_once __DIR__ . '/../../config/cors.php';
+<?php
+require_once __DIR__ . '/../config/cors.php';
 /**
  * Guest Track Blood Request Endpoint
  * GET /api/guest/track.php
@@ -162,3 +162,4 @@ function getGuestLifecycleStatus($requestStatus, $donationStatus)
 
     return $statusMap[$requestStatus] ?? ['status' => 'unknown', 'label' => 'Unknown', 'message' => 'Status unknown.'];
 }
+

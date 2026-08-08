@@ -127,21 +127,30 @@ export default function Requests() {
     setAssigning(false)
   }
 
-  const confirmAssign = () => {
+  const confirmAssign = async () => {
     if (!selectedDonor) return
     setAssigning(true)
     
-    // As per current API structure there's no endpoint to assign a donor directly here,
-    // so we mock the assignment process as completed on the UI
-    setTimeout(() => {
-      const donor = compatibleDonors.find((d) => d.id === selectedDonor)
-      setRequests(reqs => reqs.map(r => r.id === activeRequest.id ? { ...r, status: 'in_progress', donation: { donor_name: donor.name } } : r))
-      toast(`${donor?.name} assigned to ${activeRequest.request_code}.`, {
-        type: 'success',
-        title: 'Request matched',
+    try {
+      const res = await api.post('/hospital/requests/assign.php', {
+        request_id: activeRequest.id,
+        donor_id: selectedDonor
       })
-      closeFulfill()
-    }, 900)
+      
+      if (res.success) {
+        const donor = compatibleDonors.find((d) => d.id === selectedDonor)
+        setRequests(reqs => reqs.map(r => r.id === activeRequest.id ? { ...r, status: 'in_progress', donation: { donor_name: donor.name } } : r))
+        toast(`${donor?.name} assigned to ${activeRequest.request_code}.`, { type: 'success' })
+        closeFulfill()
+      } else {
+        toast(res.message || 'Failed to assign donor', { type: 'error' })
+      }
+    } catch (err) {
+      console.error(err)
+      toast('An error occurred during assignment', { type: 'error' })
+    } finally {
+      setAssigning(false)
+    }
   }
 
   const handleCreateRequest = async (e) => {

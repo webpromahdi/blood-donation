@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
+import api from '../../utils/apiService'
 import {
   Droplet,
   ChevronDown,
@@ -29,7 +30,6 @@ import {
 } from 'lucide-react'
 import ThemeToggle from '../shared/ThemeToggle'
 import { useAuth } from '../../context/AuthContext'
-import { NOTIFICATIONS } from '../../utils/mockData'
 
 const NOTIF_ICONS = {
   emergency: { icon: AlertTriangle, cls: 'text-red-600 dark:text-red-400' },
@@ -92,7 +92,33 @@ export default function DashboardLayout({ role = 'donor' }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const items = NAV[role] || NAV.donor
-  const unread = NOTIFICATIONS.filter((n) => n.unread).length
+  const [notifications, setNotifications] = useState([])
+  const unread = notifications.filter((n) => parseInt(n.is_read) === 0).length
+
+  useEffect(() => {
+    const fetchNotifs = async () => {
+      try {
+        const data = await api.get('/notifications/list.php?limit=5')
+        if (data.notifications) {
+          setNotifications(data.notifications)
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    }
+    fetchNotifs()
+    const interval = setInterval(fetchNotifs, 30000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const handleMarkAllRead = async () => {
+    try {
+      await api.post('/notifications/mark-all-read.php', {})
+      setNotifications(notifications.map(n => ({ ...n, is_read: 1 })))
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
   const closeMenus = () => {
     setNotifOpen(false)
@@ -217,33 +243,40 @@ export default function DashboardLayout({ role = 'donor' }) {
                     <h4 className="text-sm font-semibold text-gray-900 dark:text-slate-100">
                       Notifications
                     </h4>
-                    <button className="text-xs font-medium text-red-600 hover:text-red-700 dark:text-red-400">
+                    <button onClick={handleMarkAllRead} className="text-xs font-medium text-red-600 hover:text-red-700 dark:text-red-400">
                       Mark all read
                     </button>
                   </div>
                   <ul className="max-h-80 divide-y divide-gray-100 overflow-y-auto dark:divide-slate-700">
-                    {NOTIFICATIONS.map((n) => {
-                      const meta = NOTIF_ICONS[n.type] || NOTIF_ICONS.info
-                      return (
-                        <li
-                          key={n.id}
-                          className={`flex gap-3 px-4 py-3 ${n.unread ? 'bg-red-50/40 dark:bg-red-950/20' : ''}`}
-                        >
-                          <meta.icon className={`mt-0.5 h-4.5 w-4.5 shrink-0 ${meta.cls}`} />
-                          <div className="min-w-0">
-                            <p className="text-sm font-medium text-gray-900 dark:text-slate-100">
-                              {n.title}
-                            </p>
-                            <p className="truncate text-xs text-gray-500 dark:text-slate-400">
-                              {n.body}
-                            </p>
-                            <p className="mt-0.5 text-[11px] text-gray-400 dark:text-slate-500">
-                              {n.time}
-                            </p>
-                          </div>
-                        </li>
-                      )
-                    })}
+                    {notifications.length === 0 ? (
+                      <li className="px-4 py-6 text-center text-sm text-gray-500 dark:text-slate-400">
+                        No notifications
+                      </li>
+                    ) : (
+                      notifications.slice(0, 5).map((n) => {
+                        const meta = NOTIF_ICONS[n.type] || NOTIF_ICONS.info
+                        const isUnread = parseInt(n.is_read) === 0
+                        return (
+                          <li
+                            key={n.id}
+                            className={`flex gap-3 px-4 py-3 ${isUnread ? 'bg-red-50/40 dark:bg-red-950/20' : ''}`}
+                          >
+                            <meta.icon className={`mt-0.5 h-4.5 w-4.5 shrink-0 ${meta.cls}`} />
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium text-gray-900 dark:text-slate-100">
+                                {n.title}
+                              </p>
+                              <p className="truncate text-xs text-gray-500 dark:text-slate-400">
+                                {n.message}
+                              </p>
+                              <p className="mt-0.5 text-[11px] text-gray-400 dark:text-slate-500">
+                                {new Date(n.created_at).toLocaleString()}
+                              </p>
+                            </div>
+                          </li>
+                        )
+                      })
+                    )}
                   </ul>
                   <Link
                     to={`/${role}/notifications`}

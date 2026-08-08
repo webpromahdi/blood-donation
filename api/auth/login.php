@@ -1,5 +1,5 @@
-﻿<?php
-require_once __DIR__ . '/../../config/cors.php';
+<?php
+require_once __DIR__ . '/../config/cors.php';
 /**
  * User Login Endpoint
  * POST /api/auth/login.php
@@ -122,3 +122,4 @@ try {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Login failed. Please try again.']);
 }
+

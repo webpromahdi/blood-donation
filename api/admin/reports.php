@@ -1,5 +1,5 @@
-﻿<?php
-require_once __DIR__ . '/../../config/cors.php';
+<?php
+require_once __DIR__ . '/../config/cors.php';
 /**
  * Admin Reports API
  * GET /api/admin/reports.php
@@ -786,3 +786,4 @@ function generateCSV($report, $filename, $reportType) {
     fclose($output);
     exit;
 }
+

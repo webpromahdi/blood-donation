@@ -13,6 +13,8 @@ import {
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import Select from '../../components/ui/Select'
+import { api } from '../../utils/apiService'
+import { useToast } from '../../components/ui/Toast'
 
 const INFO = [
   { icon: MapPin, title: 'Visit Us', value: 'House 42, Road 11, Banani, Dhaka 1213' },
@@ -28,6 +30,7 @@ const SOCIALS = [Globe, MessageCircle, Share2]
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export default function Contact() {
+  const { toast } = useToast()
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' })
   const [errors, setErrors] = useState({})
   const [isLoading, setIsLoading] = useState(false)
@@ -48,7 +51,7 @@ export default function Contact() {
     return next
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     const next = validate()
     if (Object.keys(next).length) {
@@ -56,10 +59,20 @@ export default function Contact() {
       return
     }
     setIsLoading(true)
-    setTimeout(() => {
+    
+    try {
+      const res = await api.post('/guest/contact.php', form)
+      if (res.success) {
+        setSent(true)
+      } else {
+        toast(res.message || 'Failed to send message', { type: 'error' })
+      }
+    } catch (err) {
+      console.error(err)
+      toast('An error occurred. Please try again later.', { type: 'error' })
+    } finally {
       setIsLoading(false)
-      setSent(true)
-    }, 1500)
+    }
   }
 
   return (

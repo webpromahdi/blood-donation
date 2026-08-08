@@ -20,6 +20,7 @@ import Input from '../../components/ui/Input'
 import Select from '../../components/ui/Select'
 import BloodGroupBadge from '../../components/shared/BloodGroupBadge'
 import { BLOOD_GROUPS, BLOOD_GROUP_COLORS } from '../../utils/constants'
+import { api } from '../../utils/apiService'
 
 const WHY = [
   { icon: Heart, bg: 'bg-red-100 text-red-600 dark:bg-red-950/60 dark:text-red-400', title: 'Save Lives', body: 'One donation can save up to 3 patients in need.' },
@@ -34,24 +35,12 @@ const STEPS = [
   { icon: Heart, title: 'Save a Life', body: 'Visit the hospital and make your life-saving donation.' },
 ]
 
-const AVAILABILITY = {
-  'A+': 1240, 'A-': 380, 'B+': 980, 'B-': 210,
-  'AB+': 420, 'AB-': 95, 'O+': 1580, 'O-': 290,
-}
-
 const BAR_FILL = {
   red: 'bg-red-500',
   blue: 'bg-blue-500',
   purple: 'bg-purple-500',
   green: 'bg-green-500',
 }
-
-const IMPACT = [
-  { value: 50000, suffix: '+', label: 'Donors Registered' },
-  { value: 100000, suffix: '+', label: 'Lives Saved' },
-  { value: 200, suffix: '+', label: 'Hospital Partners' },
-  { value: 24, suffix: '/7', label: 'Emergency Support' },
-]
 
 const TESTIMONIALS = [
   { quote: "Donating blood is the easiest thing I've ever done to save a life. The BloodConnect team made every step effortless.", name: 'Karim Hossain', role: 'Regular Donor, Dhaka' },
@@ -108,6 +97,31 @@ export default function Home() {
   const [checked, setChecked] = useState(false)
   const [impactActive, setImpactActive] = useState(false)
   const impactRef = useRef(null)
+
+  const [stats, setStats] = useState({
+    impact: { donors: 0, livesSaved: 0, hospitals: 0 },
+    availability: { 'A+': 0, 'A-': 0, 'B+': 0, 'B-': 0, 'AB+': 0, 'AB-': 0, 'O+': 0, 'O-': 0 }
+  })
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await api.get('/guest/stats.php')
+        if (res.success) {
+          setStats({
+            impact: res.impact,
+            availability: Object.assign(
+              { 'A+': 0, 'A-': 0, 'B+': 0, 'B-': 0, 'AB+': 0, 'AB-': 0, 'O+': 0, 'O-': 0 },
+              res.availability
+            )
+          })
+        }
+      } catch (err) {
+        console.error("Failed to fetch stats:", err)
+      }
+    }
+    fetchStats()
+  }, [])
 
   useEffect(() => {
     const el = impactRef.current
@@ -190,8 +204,8 @@ export default function Home() {
             </div>
             <div className="mt-10 flex flex-wrap gap-10 border-t border-gray-100 pt-8 dark:border-slate-800">
               {[
-                { n: '50,000+', l: 'Registered donors' },
-                { n: '100,000+', l: 'Lives saved' },
+                { n: `${stats.impact.donors}+`, l: 'Registered donors' },
+                { n: `${stats.impact.livesSaved}+`, l: 'Lives saved' },
                 { n: '24/7', l: 'Emergency support' },
               ].map((s) => (
                 <div key={s.l}>
@@ -285,8 +299,8 @@ export default function Home() {
           </div>
           <div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4">
             {BLOOD_GROUPS.map((g) => {
-              const donors = AVAILABILITY[g]
-              const pct = Math.round((donors / 1600) * 100)
+              const donors = stats.availability[g] || 0
+              const pct = Math.round((donors / Math.max(50, donors * 1.5)) * 100)
               const fill = BAR_FILL[BLOOD_GROUP_COLORS[g]] || 'bg-red-500'
               return (
                 <div
@@ -318,7 +332,12 @@ export default function Home() {
             className="rounded-md bg-gradient-to-r from-red-600 to-red-800 py-16 text-white shadow-xl"
           >
             <div className="grid grid-cols-2 gap-8 px-6 text-center md:grid-cols-4">
-              {IMPACT.map((s) => (
+              {[
+                { value: stats.impact.donors, suffix: '+', label: 'Donors Registered' },
+                { value: stats.impact.livesSaved, suffix: '+', label: 'Lives Saved' },
+                { value: stats.impact.hospitals, suffix: '+', label: 'Hospital Partners' },
+                { value: 24, suffix: '/7', label: 'Emergency Support' },
+              ].map((s) => (
                 <div key={s.label}>
                   <p className="text-4xl font-bold sm:text-5xl">
                     <CountUp value={s.value} suffix={s.suffix} active={impactActive} />

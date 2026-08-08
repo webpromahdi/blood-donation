@@ -1,5 +1,5 @@
-﻿<?php
-require_once __DIR__ . '/../../config/cors.php';
+<?php
+require_once __DIR__ . '/../config/cors.php';
 /**
  * API: Get Messages (Fetch Conversation)
  * GET /api/chat/get-messages.php
@@ -130,3 +130,4 @@ try {
     error_log('Get Messages Error: ' . $e->getMessage());
     jsonResponse(500, ['success' => false, 'error' => 'Failed to fetch messages']);
 }
+
