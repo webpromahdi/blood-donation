@@ -10,10 +10,11 @@
  * - S8: Request expired (required date passed)
  */
 
-// Security: Only allow CLI execution
-if (php_sapi_name() !== 'cli') {
+// Security: Allow CLI execution OR web execution with a secret key
+$secretKey = 'bloodconnect2026';
+if (php_sapi_name() !== 'cli' && (!isset($_GET['cron_secret']) || $_GET['cron_secret'] !== $secretKey)) {
     http_response_code(403);
-    die('This script can only be run from command line');
+    die('Forbidden: Invalid secret key or not CLI');
 }
 
 // Set error reporting
