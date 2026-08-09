@@ -36,10 +36,11 @@ export default function StatCard({
   suffix = '',
   iconBg = 'bg-red-50 dark:bg-red-950/50',
   iconColor = 'text-red-600 dark:text-red-400',
+  disableAnimation = false,
 }) {
   const animated = useCountUp(value)
   const cleaned = String(value).replace(/[^0-9.,]/g, '')
-  const isNumeric = cleaned !== '' && /^[0-9.,]+$/.test(cleaned)
+  const isNumeric = !disableAnimation && cleaned !== '' && /^[0-9.,]+$/.test(cleaned)
   const display = isNumeric ? Math.round(animated).toLocaleString('en-US') : value
 
   // Reconcile legacy `delta` (signed number) with spec `change`/`changeType`.

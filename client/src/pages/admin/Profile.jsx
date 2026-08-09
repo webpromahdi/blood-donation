@@ -80,20 +80,32 @@ export default function Profile() {
 
   const setField = (key) => (e) => setInfo((p) => ({ ...p, [key]: e.target.value }))
 
-  const saveInfo = (e) => {
+  const saveInfo = async (e) => {
     e.preventDefault()
     setSavingInfo(true)
-    setTimeout(() => {
+    try {
+      const res = await api.put('/admin/profile.php', {
+        name: info.fullName,
+        phone: info.phone,
+      })
+      if (res.success) {
+        toast('Personal information updated.', { type: 'success', title: 'Saved' })
+        // Use full page reload or auth context update if needed
+      } else {
+        toast(res.message || 'Failed to update profile', { type: 'error' })
+      }
+    } catch (err) {
+      toast('Error saving profile.', { type: 'error' })
+    } finally {
       setSavingInfo(false)
-      toast('Personal information updated.', { title: 'Saved' })
-    }, 1500)
+    }
   }
 
   const savePrefs = () => {
     toast('Preferences saved.', { title: 'Saved' })
   }
 
-  const updatePassword = (e) => {
+  const updatePassword = async (e) => {
     e.preventDefault()
     if (!pwd.current || !pwd.next) {
       toast('Please fill in all password fields.', { type: 'error' })
@@ -104,11 +116,22 @@ export default function Profile() {
       return
     }
     setSavingPwd(true)
-    setTimeout(() => {
+    try {
+      const res = await api.post('/admin/profile.php', {
+        current_password: pwd.current,
+        new_password: pwd.next,
+      })
+      if (res.success) {
+        toast('Password updated securely.', { type: 'success', title: 'Success' })
+        setPwd({ current: '', next: '', confirm: '' })
+      } else {
+        toast(res.message || 'Failed to update password', { type: 'error' })
+      }
+    } catch (err) {
+      toast('Error updating password.', { type: 'error' })
+    } finally {
       setSavingPwd(false)
-      setPwd({ current: '', next: '', confirm: '' })
-      toast('Password updated securely.', { title: 'Success' })
-    }, 1500)
+    }
   }
 
   return (

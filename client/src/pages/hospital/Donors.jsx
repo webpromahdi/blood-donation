@@ -9,9 +9,9 @@ import Modal from '../../components/ui/Modal'
 import { useToast } from '../../components/ui/Toast'
 import {
   BLOOD_GROUPS,
-  DONATION_TYPES,
 } from '../../utils/constants'
 import { api } from '../../utils/apiService'
+import { useNavigate } from 'react-router-dom'
 
 const AVATAR_TINTS = [
   { range: 'ABCD', cls: 'bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-300' },
@@ -27,7 +27,7 @@ function avatarTint(name = '') {
   return (AVATAR_TINTS.find((t) => t.range.includes(first)) || AVATAR_TINTS[0]).cls
 }
 
-function HospitalDonorCard({ donor, onRequest }) {
+function HospitalDonorCard({ donor, onMessage }) {
   const initials = donor.name
     .split(' ')
     .map((n) => n[0])
@@ -72,8 +72,8 @@ function HospitalDonorCard({ donor, onRequest }) {
       )}
 
       <div className="mt-auto pt-4">
-        <Button variant="primary" size="sm" fullWidth onClick={() => onRequest(donor)} disabled={!donor.is_available}>
-          {donor.is_available ? 'Request Donation' : 'Not Eligible Yet'}
+        <Button variant="secondary" size="sm" fullWidth onClick={() => onMessage(donor)}>
+          Message Donor
         </Button>
       </div>
     </div>
@@ -82,6 +82,7 @@ function HospitalDonorCard({ donor, onRequest }) {
 
 export default function Donors() {
   const { toast } = useToast()
+  const navigate = useNavigate()
   
   const [loading, setLoading] = useState(true)
   const [donors, setDonors] = useState([])
@@ -92,9 +93,6 @@ export default function Donors() {
   const [availableOnly, setAvailableOnly] = useState(false)
   const [search, setSearch] = useState('')
 
-  const [activeDonor, setActiveDonor] = useState(null)
-  const [form, setForm] = useState({ date: '', time: '', type: DONATION_TYPES[0], notes: '' })
-  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     fetchDonors()
@@ -129,25 +127,8 @@ export default function Donors() {
     })
   }, [donors, bloodGroup, city, availableOnly, search])
 
-  const handleRequest = (donor) => {
-    setActiveDonor(donor)
-    setForm({ date: '', time: '', type: DONATION_TYPES[0], notes: '' })
-  }
-
-  const submitRequest = async () => {
-    if (!form.date || !form.time) {
-      toast('Please provide a date and time.', { type: 'error' })
-      return
-    }
-    setSubmitting(true)
-    
-    // As per the mock behavior, since there might not be a direct "request specific donor" API endpoint,
-    // we'll simulate the success or redirect them to create a request and assign the donor
-    setTimeout(() => {
-      setSubmitting(false)
-      setActiveDonor(null)
-      toast(`Donation request sent to ${activeDonor.name}.`, { type: 'success' })
-    }, 1200)
+  const handleMessage = (donor) => {
+    navigate(`/hospital/chat?user=${donor.user_id}&name=${encodeURIComponent(donor.name)}`)
   }
 
   return (
@@ -199,84 +180,10 @@ export default function Donors() {
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((donor) => (
-            <HospitalDonorCard key={donor.id} donor={donor} onRequest={handleRequest} />
+            <HospitalDonorCard key={donor.id} donor={donor} onMessage={handleMessage} />
           ))}
         </div>
       )}
-
-      {/* Request Modal */}
-      <Modal
-        open={!!activeDonor}
-        onClose={() => !submitting && setActiveDonor(null)}
-        title="Request Donation"
-        size="md"
-        footer={
-          <>
-            <Button variant="ghost" onClick={() => setActiveDonor(null)} disabled={submitting}>
-              Cancel
-            </Button>
-            <Button variant="primary" onClick={submitRequest} loading={submitting}>
-              Send Request
-            </Button>
-          </>
-        }
-      >
-        {activeDonor && (
-          <div className="space-y-4 pt-4">
-            <div className="flex items-center gap-4 rounded-md border border-gray-100 bg-gray-50 p-4 dark:border-slate-700/50 dark:bg-slate-800/50">
-              <div
-                className={`flex size-12 items-center justify-center rounded-full text-lg font-semibold ${avatarTint(activeDonor.name)}`}
-              >
-                {activeDonor.name.charAt(0)}
-              </div>
-              <div>
-                <h4 className="font-semibold text-gray-900 dark:text-slate-100">
-                  {activeDonor.name}
-                </h4>
-                <div className="mt-1 flex items-center gap-3 text-sm text-gray-500">
-                  <BloodGroupBadge group={activeDonor.blood_group} size="sm" showIcon={false} />
-                  <span>{activeDonor.total_donations} donations</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Input
-                label="Preferred Date"
-                type="date"
-                value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
-                required
-              />
-              <Input
-                label="Time"
-                type="time"
-                value={form.time}
-                onChange={(e) => setForm({ ...form, time: e.target.value })}
-                required
-              />
-            </div>
-            <Select
-              label="Donation Type"
-              options={DONATION_TYPES}
-              value={form.type}
-              onChange={(e) => setForm({ ...form, type: e.target.value })}
-            />
-            <div className="space-y-1">
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">
-                Message to Donor (Optional)
-              </label>
-              <textarea
-                className="w-full rounded-md border border-gray-300 bg-white p-2 text-sm placeholder-gray-400 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
-                rows={3}
-                placeholder="E.g., Urgent requirement for surgery..."
-                value={form.notes}
-                onChange={(e) => setForm({ ...form, notes: e.target.value })}
-              />
-            </div>
-          </div>
-        )}
-      </Modal>
     </div>
   )
 }

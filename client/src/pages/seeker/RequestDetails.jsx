@@ -59,9 +59,10 @@ export default function RequestDetails() {
       case 'pending': return 1;
       case 'approved': return 2;
       case 'donor_assigned':
-      case 'on_the_way':
-      case 'reached': return 3;
-      case 'completed': return 4;
+      case 'accepted': return 3;
+      case 'on_the_way': return 4;
+      case 'reached': return 5;
+      case 'completed': return 6;
       default: return 0;
     }
   }
@@ -138,13 +139,18 @@ export default function RequestDetails() {
         ) : (
           <div className="pt-8 pb-4">
             <div className="relative flex justify-between">
-              <div className="absolute left-0 top-6 h-0.5 w-full -translate-y-1/2 border-t-2 border-dashed border-gray-200 dark:border-slate-700" />
+              {/* Background lines */}
+              <div className="absolute left-[8.33%] right-[8.33%] top-6 h-0.5 -translate-y-1/2 border-t-2 border-dashed border-gray-200 dark:border-slate-700" />
+              <div 
+                className="absolute left-[8.33%] top-6 h-1 -translate-y-1/2 bg-red-600 transition-all duration-500" 
+                style={{ width: `${(Math.max(0, progress - 1) / 5) * 83.33}%` }} 
+              />
               {['Submitted', 'Searching Donor', 'Donor Assigned', 'On the Way', 'Reached', 'Completed'].map((step, i) => {
                 const stepNum = i + 1;
                 const isPast = stepNum < progress;
                 const isCurrent = stepNum === progress;
                 return (
-                  <div key={step} className="relative z-10 flex flex-col items-center bg-white px-4 dark:bg-slate-800 w-1/6 text-center">
+                  <div key={step} className="relative z-10 flex flex-col items-center px-4 w-1/6 text-center">
                     <div className={`mb-3 flex h-12 w-12 items-center justify-center rounded-full ${isPast ? 'bg-red-600 text-white' : isCurrent ? 'bg-red-600 text-white ring-4 ring-red-100 dark:ring-red-900/50' : 'bg-gray-100 text-gray-400 dark:bg-slate-700'}`}>
                       {stepNum}
                     </div>

@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+if ($_SERVER['REQUEST_METHOD'] !== 'GET' && $_SERVER['REQUEST_METHOD'] !== 'PUT') {
     http_response_code(405);
     echo json_encode(['success' => false, 'message' => 'Method not allowed']);
     exit;
@@ -33,6 +33,47 @@ $conn = $database->getConnection();
 if (!$conn) {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Database connection failed']);
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
+    $data = json_decode(file_get_contents('php://input'), true);
+    
+    $name = $data['name'] ?? '';
+    $phone = $data['phone'] ?? '';
+    $address = $data['address'] ?? '';
+    $city = $data['city'] ?? '';
+    
+    if (empty($name)) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Name is required']);
+        exit;
+    }
+    
+    try {
+        $conn->beginTransaction();
+        
+        $stmtUser = $conn->prepare("UPDATE users SET name = ?, phone = ? WHERE id = ?");
+        $stmtUser->execute([$name, $phone, $userId]);
+        
+        $stmtSeeker = $conn->prepare("UPDATE seekers SET address = ?, city = ? WHERE user_id = ?");
+        $stmtSeeker->execute([$address, $city, $userId]);
+        
+        $conn->commit();
+        
+        // Update session info
+        $_SESSION['name'] = $name;
+        $_SESSION['phone'] = $phone;
+        
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true, 'message' => 'Profile updated successfully']);
+    } catch (PDOException $e) {
+        $conn->rollBack();
+        error_log("Update seeker profile error: " . $e->getMessage());
+        header('Content-Type: application/json');
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Failed to update profile']);
+    }
     exit;
 }
 

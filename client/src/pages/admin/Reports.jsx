@@ -137,9 +137,15 @@ export default function Reports() {
         title="Analytics & Reports"
         subtitle="Insights on platform activity, donations, and requirements."
         actions={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Button variant="secondary" onClick={() => window.open(`${api.baseURL}/admin/reports.php?action=download&report_type=donor&format=csv`)}>
+              <Download className="h-4 w-4" /> Donor Report
+            </Button>
+            <Button variant="secondary" onClick={() => window.open(`${api.baseURL}/admin/reports.php?action=download&report_type=hospital&format=csv`)}>
+              <Download className="h-4 w-4" /> Hospital Report
+            </Button>
             <Button variant="secondary" onClick={() => window.open(`${api.baseURL}/admin/reports.php?action=download&report_type=monthly&format=csv`)}>
-              <Download className="h-4 w-4" /> Download CSV
+              <Download className="h-4 w-4" /> Monthly Summary
             </Button>
           </div>
         }

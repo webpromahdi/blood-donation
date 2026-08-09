@@ -5,6 +5,7 @@ import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import Select from '../../components/ui/Select'
 import Badge from '../../components/ui/Badge'
+import Modal from '../../components/ui/Modal'
 import { useToast } from '../../components/ui/Toast'
 import { api } from '../../utils/apiService'
 
@@ -41,6 +42,8 @@ export default function Announcements() {
   const [target, setTarget] = useState('all')
   const [schedule, setSchedule] = useState('')
   const [publishing, setPublishing] = useState(false)
+  const [deleteId, setDeleteId] = useState(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     fetchAnnouncements()
@@ -95,18 +98,22 @@ export default function Announcements() {
     }
   }
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this announcement?')) return
+  const handleDelete = async () => {
+    if (!deleteId) return
+    setDeleting(true)
     try {
-      const data = await api.delete(`/admin/announcements.php?id=${id}`)
+      const data = await api.delete(`/admin/announcements.php?id=${deleteId}`)
       if (data.success) {
-        setList((prev) => prev.filter((a) => a.id !== id))
+        setList((prev) => prev.filter((a) => a.id !== deleteId))
         toast('Announcement deleted.', { type: 'info' })
+        setDeleteId(null)
       } else {
         toast(data.message || 'Delete failed.', { type: 'error' })
       }
     } catch (err) {
       toast('Delete failed.', { type: 'error' })
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -169,9 +176,8 @@ export default function Announcements() {
                 <div className="mt-3 flex items-center gap-1">
                   <Button
                     variant="ghost"
-                    size="sm"
-                    className="text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
-                    onClick={() => handleDelete(a.id)}
+                    className="text-gray-400 hover:text-red-600 dark:hover:text-red-400"
+                    onClick={() => setDeleteId(a.id)}
                   >
                     <Trash2 className="h-4 w-4" />
                     Delete
@@ -233,6 +239,28 @@ export default function Announcements() {
           </div>
         </form>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        open={!!deleteId}
+        onClose={() => !deleting && setDeleteId(null)}
+        title="Confirm Deletion"
+        size="sm"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setDeleteId(null)} disabled={deleting}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={handleDelete} loading={deleting}>
+              Delete
+            </Button>
+          </>
+        }
+      >
+        <p className="text-sm text-gray-600 dark:text-slate-300">
+          Are you sure you want to delete this announcement? This action cannot be undone.
+        </p>
+      </Modal>
     </div>
   )
 }

@@ -84,9 +84,9 @@ export default function History() {
     { key: 'cert', label: 'Certificate' },
   ]
 
-  const handleDownload = (certId) => {
-    if (!certId) return
-    window.open(`${API_BASE_URL}/donor/certificates/download.php?id=${certId}`, '_blank')
+  const handleDownload = (donationId) => {
+    if (!donationId) return
+    window.open(`${API_BASE_URL}/donor/certificates/download.php?donation_id=${donationId}`, '_blank')
   }
 
   return (
@@ -183,7 +183,7 @@ export default function History() {
                 size="sm"
                 disabled={row.status?.toLowerCase() !== 'completed'}
                 aria-label="Download certificate"
-                onClick={() => handleDownload(row.certificate?.cert_id)}
+                onClick={() => handleDownload(row.id)}
               >
                 <Download className="h-4 w-4" />
               </Button>

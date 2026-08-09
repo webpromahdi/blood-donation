@@ -79,6 +79,7 @@ export default function DonorDashboard() {
   const { toast } = useToast()
 
   const [stats, setStats] = useState(null)
+  const [profile, setProfile] = useState(null)
   const [activeDonation, setActiveDonation] = useState(null)
   const [donationState, setDonationState] = useState(null)
   const [history, setHistory] = useState([])
@@ -101,6 +102,7 @@ export default function DonorDashboard() {
       .then(([profileRes, historyRes, campsRes, reqRes]) => {
         if (profileRes.success) {
           setStats(profileRes.stats)
+          if (profileRes.profile) setProfile(profileRes.profile)
           if (profileRes.active_donation) {
             setActiveDonation(profileRes.active_donation)
             setDonationState(profileRes.active_donation.status)
@@ -264,8 +266,13 @@ export default function DonorDashboard() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard icon={HeartPulse} label="Total Donations" value={stats?.total_donations || 0} />
         <StatCard icon={Award} label="Lives Saved (Est.)" value={(stats?.total_donations || 0) * 3} />
-        <StatCard icon={CalendarClock} label="Next Eligible Date" value={stats?.next_eligible ? new Date(stats.next_eligible).toLocaleDateString() : 'Ready'} />
-        <StatCard icon={Droplet} label="Blood Group" value={user?.blood_group || 'N/A'} />
+        <StatCard 
+          icon={CalendarClock} 
+          label="Next Eligible Date" 
+          value={(!stats || stats.is_eligible) ? 'Ready' : new Date(stats.next_eligible).toLocaleDateString()} 
+          disableAnimation={true}
+        />
+        <StatCard icon={Droplet} label="Blood Group" value={profile?.blood_group || user?.blood_group || 'N/A'} />
       </div>
 
       {/* Active Donation Tracker */}
@@ -297,22 +304,26 @@ export default function DonorDashboard() {
 
           <div className="mb-5">
             <p className="mb-3 text-sm font-medium text-gray-600 dark:text-slate-400">Donation Progress</p>
-            <div className="flex items-start">
+            <div className="relative flex justify-between">
+              {/* Background lines */}
+              <div className="absolute left-[20px] right-[20px] top-5 h-1 -translate-y-1/2 bg-gray-200 dark:bg-slate-700" />
+              <div 
+                className="absolute left-[20px] top-5 h-1 -translate-y-1/2 bg-green-500 transition-all duration-300" 
+                style={{ width: `calc(${(Math.max(0, currentStateIdx) / (STEP_CONFIG.length - 1)) * 100}% - 40px)` }} 
+              />
+              
               {STEP_CONFIG.map((step, i) => {
                 const isDone = i < currentStateIdx
                 const isCurrent = i === currentStateIdx
                 const StepIcon = step.icon
                 return (
-                  <div key={i} className="flex flex-1 flex-col items-center">
-                    <div className="flex w-full items-center">
-                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${isDone ? 'bg-green-500 text-white' : isCurrent ? 'bg-blue-500 text-white ring-4 ring-blue-200 dark:ring-blue-900/60' : 'bg-gray-200 text-gray-400 dark:bg-slate-700 dark:text-slate-500'}`}>
-                        <StepIcon className="h-5 w-5" />
-                      </div>
-                      {i < STEP_CONFIG.length - 1 && (
-                        <div className={`h-1 flex-1 transition-all duration-300 ${isDone ? 'bg-green-500' : 'bg-gray-200 dark:bg-slate-700'}`} />
-                      )}
+                  <div key={i} className="relative z-10 flex flex-col items-center w-16">
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${isDone ? 'bg-green-500 text-white' : isCurrent ? 'bg-blue-500 text-white ring-4 ring-blue-200 dark:ring-blue-900/60' : 'bg-gray-200 text-gray-400 dark:bg-slate-700 dark:text-slate-500'}`}>
+                      <StepIcon className="h-5 w-5" />
                     </div>
-                    <span className={`mt-2 text-center text-xs ${isCurrent ? 'font-semibold text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-slate-400'}`}>{step.label}</span>
+                    <span className={`mt-2 text-center text-[11px] sm:text-xs leading-tight ${isCurrent ? 'font-semibold text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-slate-400'}`}>
+                      {step.label}
+                    </span>
                   </div>
                 )
               })}
@@ -339,7 +350,7 @@ export default function DonorDashboard() {
       )}
 
       {/* Emergency Requests */}
-      {!activeDonation && emergencyRequests.length > 0 && (
+      {!activeDonation && stats?.is_eligible && emergencyRequests.length > 0 && (
         <div className="mt-6 rounded-xl border border-red-200 bg-gradient-to-r from-red-50 to-white p-6 shadow-sm dark:border-red-900/30 dark:from-red-950/20 dark:to-slate-900">
           <div className="mb-4 flex items-start gap-4">
             <div className="rounded-lg bg-red-100 p-3 dark:bg-red-900/50"><AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" /></div>
@@ -376,7 +387,7 @@ export default function DonorDashboard() {
       )}
 
       {/* Normal Requests */}
-      {!activeDonation && normalRequests.length > 0 && (
+      {!activeDonation && stats?.is_eligible && normalRequests.length > 0 && (
         <div className="mt-6 rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-white p-6 shadow-sm dark:border-blue-900/30 dark:from-blue-950/20 dark:to-slate-900">
           <div className="mb-4 flex items-start gap-4">
             <div className="rounded-lg bg-blue-100 p-3 dark:bg-blue-900/50"><CalendarClock className="h-6 w-6 text-blue-600 dark:text-blue-400" /></div>
@@ -419,27 +430,29 @@ export default function DonorDashboard() {
               <h3 className="font-semibold text-gray-900 dark:text-slate-100">Donations over time</h3>
               <p className="text-sm text-gray-500 dark:text-slate-400">Your yearly contribution</p>
             </div>
-            <BloodGroupBadge group={user?.blood_group || 'N/A'} />
+            <BloodGroupBadge group={profile?.blood_group || user?.blood_group || 'N/A'} />
           </div>
           <div className="mt-6 h-64"><Line data={chartData} options={chartOptions} /></div>
         </div>
         <div className="rounded-md border border-gray-200 bg-white p-6 shadow-[var(--shadow-card)] dark:border-slate-700 dark:bg-slate-800">
           <h3 className="font-semibold text-gray-900 dark:text-slate-100">Eligibility status</h3>
           <div className="mt-5 flex flex-col items-center text-center">
-            <div className={`flex h-24 w-24 items-center justify-center rounded-full border-4 ${stats?.is_eligible ? 'border-green-500 text-green-600 dark:text-green-400' : 'border-amber-500 text-amber-600 dark:text-amber-400'}`}>
-              <span className="text-2xl font-bold">{stats?.is_eligible ? 'Ready' : 'Wait'}</span>
+            <div className={`flex h-24 w-24 items-center justify-center rounded-full border-4 ${(!stats || stats.is_eligible) ? 'border-green-500 text-green-600 dark:text-green-400' : 'border-amber-500 text-amber-600 dark:text-amber-400'}`}>
+              <span className="text-2xl font-bold">{(!stats || stats.is_eligible) ? 'Ready' : 'Wait'}</span>
             </div>
             <p className="mt-4 text-sm text-gray-600 dark:text-slate-300">
-              {stats?.is_eligible ? 'You are eligible to donate today.' : `You can donate in ${stats?.days_until_eligible} days.`}
+              {(!stats || stats.is_eligible) ? 'You are eligible to donate today.' : `You can donate in ${stats.days_until_eligible} days.`}
             </p>
             <div className="mt-4 w-full space-y-2 text-sm">
               <div className="flex justify-between text-gray-500 dark:text-slate-400">
                 <span>Last donation</span>
-                <span className="font-medium text-gray-900 dark:text-slate-200">{stats?.last_donation ? new Date(stats.last_donation).toLocaleDateString() : 'Never'}</span>
+                <span className="font-medium text-gray-900 dark:text-slate-200">
+                  {(!stats?.last_donation || stats.last_donation.startsWith('0000')) ? 'Never' : new Date(stats.last_donation).toLocaleDateString()}
+                </span>
               </div>
               <div className="flex justify-between text-gray-500 dark:text-slate-400">
                 <span>Weight</span>
-                <span className="font-medium text-gray-900 dark:text-slate-200">{user?.weight || 'N/A'} kg</span>
+                <span className="font-medium text-gray-900 dark:text-slate-200">{profile?.weight || user?.weight || 'N/A'} kg</span>
               </div>
             </div>
             <Button as={Link} to="/donor/health" variant="outline" size="sm" fullWidth className="mt-5">View health details</Button>

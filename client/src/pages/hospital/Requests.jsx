@@ -182,6 +182,7 @@ export default function Requests() {
     { key: 'id', label: 'Request ID' },
     { key: 'patient', label: 'Patient Name' },
     { key: 'group', label: 'Blood Group' },
+    { key: 'source', label: 'Source' },
     { key: 'units', label: 'Units' },
     { key: 'urgency', label: 'Urgency' },
     { key: 'status', label: 'Status' },
@@ -189,11 +190,13 @@ export default function Requests() {
     { key: 'actions', label: 'Actions', className: 'text-right' },
   ]
 
+  const hospitalRequests = requests.filter(r => r.requester_type === 'hospital')
+
   const stats = {
-    total: requests.length,
-    pending: requests.filter(r => r.status === 'pending').length,
-    fulfilled: requests.filter(r => r.status === 'completed').length,
-    rejected: requests.filter(r => r.status === 'rejected').length
+    total: hospitalRequests.length,
+    pending: hospitalRequests.filter(r => r.status === 'pending').length,
+    fulfilled: hospitalRequests.filter(r => r.status === 'completed').length,
+    rejected: hospitalRequests.filter(r => r.status === 'rejected').length
   }
 
   return (
@@ -276,9 +279,14 @@ export default function Requests() {
                 <Td className="font-mono text-sm text-gray-900 dark:text-slate-100">{r.request_code}</Td>
                 <Td>{r.patient_name}</Td>
                 <Td>
-                  <BloodGroupBadge group={r.blood_type} size="sm" />
-                </Td>
-                <Td>{r.quantity}</Td>
+                <BloodGroupBadge group={r.blood_type} size="sm" />
+              </Td>
+              <Td>
+                <Badge tone={r.requester_type === 'hospital' ? 'primary' : 'info'} size="sm">
+                  {r.requester_type === 'hospital' ? 'Internal' : 'Seeker'}
+                </Badge>
+              </Td>
+              <Td>{r.quantity}</Td>
                 <Td>
                   <Badge tone={URGENCY_BADGE[r.urgency] || 'gray'} dot className="capitalize">
                     {r.urgency}

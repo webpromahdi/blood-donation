@@ -95,10 +95,10 @@ try {
 
     // Use last donation date from either donations table or donors table (whichever is more recent)
     $lastDonationDate = null;
-    if ($lastDonation && $lastDonation['completed_at']) {
+    if ($lastDonation && !empty($lastDonation['completed_at']) && strpos($lastDonation['completed_at'], '0000') !== 0) {
         $lastDonationDate = $lastDonation['completed_at'];
     }
-    if ($donor['last_donation_date']) {
+    if (!empty($donor['last_donation_date']) && strpos($donor['last_donation_date'], '0000') !== 0) {
         if (!$lastDonationDate || strtotime($donor['last_donation_date']) > strtotime($lastDonationDate)) {
             $lastDonationDate = $donor['last_donation_date'];
         }

@@ -63,7 +63,8 @@ export default function HospitalDashboard() {
   }
 
   // Calculate dynamic stats
-  const activeRequests = requests.filter(r => ['pending', 'in_progress', 'approved'].includes(r.status))
+  const hospitalRequests = requests.filter(r => r.requester_type === 'hospital')
+  const activeRequests = hospitalRequests.filter(r => ['pending', 'in_progress', 'approved'].includes(r.status))
   
   const today = new Date().toISOString().split('T')[0]
   const todayAppointments = appointments.filter(a => {
@@ -161,7 +162,7 @@ export default function HospitalDashboard() {
         <StatCard icon={ClipboardList} label="Active requests" value={activeRequests.length} />
         <StatCard icon={CalendarClock} label="Appointments today" value={todayAppointments.length} />
         <StatCard icon={Users} label="Total appointments" value={appointments.length} />
-        <StatCard icon={Droplet} label="Total requests" value={requests.length} />
+        <StatCard icon={Droplet} label="Total requests" value={hospitalRequests.length} />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
@@ -186,14 +187,11 @@ export default function HospitalDashboard() {
                     <BloodGroupBadge group={b.blood_group} size="sm" showIcon={false} />
                     {low && <AlertTriangle className="h-4 w-4 text-red-500" title="Low stock" />}
                   </div>
-                  <input
-                    type="number"
-                    min="0"
-                    value={b.units}
-                    onChange={(e) => setInventory(prev => prev.map(inv => inv.blood_group_id === b.blood_group_id ? { ...inv, units: parseInt(e.target.value) || 0 } : inv))}
-                    onBlur={(e) => updateInventory(b.blood_group_id, parseInt(e.target.value) || 0)}
-                    className="mt-3 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-xl font-bold text-gray-900 text-center dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 p-1"
-                  />
+                  <div className="mt-3 text-center">
+                    <span className="text-3xl font-bold text-gray-900 dark:text-slate-100">
+                      {b.units}
+                    </span>
+                  </div>
                   <p className="text-xs text-gray-500 dark:text-slate-400 text-center mt-1">units</p>
                 </div>
               )
@@ -235,7 +233,7 @@ export default function HospitalDashboard() {
         </div>
         <Table
           columns={columns}
-          data={requests.slice(0, 5)}
+          data={hospitalRequests.slice(0, 5)}
           empty={loading ? 'Loading...' : 'No requests found.'}
           renderRow={(r) => (
             <>

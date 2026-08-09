@@ -14,6 +14,8 @@ import {
 import PageHeader from '../../components/shared/PageHeader'
 import Button from '../../components/ui/Button'
 import { api } from '../../utils/apiService'
+import { useNavigate } from 'react-router-dom'
+import { getNotificationRoute } from '../../utils/notificationUtils'
 
 // Map the string icon from API to actual Lucide component
 const ICON_MAP = {
@@ -40,6 +42,7 @@ export default function Notifications() {
   const [activeTab, setActiveTab] = useState('all')
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
+  const navigate = useNavigate()
 
   useEffect(() => {
     fetchNotifications()
@@ -70,14 +73,17 @@ export default function Notifications() {
     }
   }
 
-  const markAsRead = async (id, isRead) => {
-    if (isRead) return
-    try {
-      await api.post('/notifications/mark-read.php', { notification_id: id })
-      setItems((prev) => prev.map((n) => n.id === id ? { ...n, read: true } : n))
-    } catch (err) {
-      console.error('Failed to mark as read:', err)
+  const handleNotificationClick = async (n) => {
+    if (!n.read) {
+      try {
+        await api.post('/notifications/mark-read.php', { notification_id: n.id })
+        setItems((prev) => prev.map((x) => x.id === n.id ? { ...x, read: true } : x))
+      } catch (err) {
+        console.error('Failed to mark as read:', err)
+      }
     }
+    const route = getNotificationRoute(n, 'hospital')
+    navigate(route)
   }
 
   const filtered = items.filter((n) => {
@@ -134,8 +140,8 @@ export default function Notifications() {
             return (
               <div
                 key={n.id}
-                onClick={() => markAsRead(n.id, n.read)}
-                className={`flex cursor-pointer items-start gap-4 rounded-md border border-gray-200 p-4 dark:border-slate-700 ${
+                onClick={() => handleNotificationClick(n)}
+                className={`flex cursor-pointer items-start gap-4 rounded-md border border-gray-200 p-4 hover:bg-gray-50 dark:border-slate-700 ${
                   unread
                     ? 'border-l-2 border-l-red-600 bg-red-50/40 dark:bg-red-950/10'
                     : 'bg-white dark:bg-slate-800'

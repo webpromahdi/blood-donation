@@ -31,6 +31,7 @@ import {
 } from 'lucide-react'
 import ThemeToggle from '../shared/ThemeToggle'
 import { useAuth } from '../../context/AuthContext'
+import { getNotificationRoute } from '../../utils/notificationUtils'
 
 const NOTIF_ICONS = {
   emergency: { icon: AlertTriangle, cls: 'text-red-600 dark:text-red-400' },
@@ -46,7 +47,6 @@ const NAV = {
     { to: '/donor/history', label: 'Donation History', icon: History },
     { to: '/donor/certificates', label: 'Certificates', icon: Award },
     { to: '/donor/chat', label: 'Messages', icon: MessageSquare },
-    { to: '/donor/notifications', label: 'Notifications', icon: Bell },
     { to: '/donor/profile', label: 'Profile', icon: User },
   ],
   admin: [
@@ -67,14 +67,12 @@ const NAV = {
     { to: '/hospital/appointments', label: 'Appointments', icon: CalendarClock },
     { to: '/hospital/requests', label: 'Blood Requests', icon: ClipboardList },
     { to: '/hospital/chat', label: 'Messages', icon: MessageSquare },
-    { to: '/hospital/notifications', label: 'Notifications', icon: Bell },
     { to: '/hospital/profile', label: 'Profile', icon: User },
   ],
   seeker: [
     { to: '/seeker/request', label: 'New Request', icon: Droplet },
     { to: '/seeker/tracking', label: 'Tracking', icon: Search },
     { to: '/seeker/chat', label: 'Messages', icon: MessageSquare },
-    { to: '/seeker/notifications', label: 'Notifications', icon: Bell },
     { to: '/seeker/profile', label: 'Profile', icon: User },
   ],
 }
@@ -94,7 +92,7 @@ export default function DashboardLayout({ role = 'donor' }) {
   const navigate = useNavigate()
   const items = NAV[role] || NAV.donor
   const [notifications, setNotifications] = useState([])
-  const unread = notifications.filter((n) => parseInt(n.is_read) === 0).length
+  const unread = notifications.filter((n) => !n.read).length
 
   useEffect(() => {
     const fetchNotifs = async () => {
@@ -112,10 +110,24 @@ export default function DashboardLayout({ role = 'donor' }) {
     return () => clearInterval(interval)
   }, [])
 
+  const handleNotificationClick = async (n) => {
+    try {
+      if (!n.read) {
+        await api.post('/notifications/mark-read.php', { notification_id: n.id })
+        setNotifications((prev) => prev.map((x) => (x.id === n.id ? { ...x, read: true } : x)))
+      }
+      closeMenus()
+      const route = getNotificationRoute(n, role)
+      navigate(route)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   const handleMarkAllRead = async () => {
     try {
       await api.post('/notifications/mark-all-read.php', {})
-      setNotifications(notifications.map(n => ({ ...n, is_read: 1 })))
+      setNotifications(notifications.map(n => ({ ...n, read: true })))
     } catch (err) {
       console.error(err)
     }
@@ -256,11 +268,12 @@ export default function DashboardLayout({ role = 'donor' }) {
                     ) : (
                       notifications.slice(0, 5).map((n) => {
                         const meta = NOTIF_ICONS[n.type] || NOTIF_ICONS.info
-                        const isUnread = parseInt(n.is_read) === 0
+                        const isUnread = !n.read
                         return (
                           <li
                             key={n.id}
-                            className={`flex gap-3 px-4 py-3 ${isUnread ? 'bg-red-50/40 dark:bg-red-950/20' : ''}`}
+                            onClick={() => handleNotificationClick(n)}
+                            className={`flex cursor-pointer gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-700/50 ${isUnread ? 'bg-red-50/40 dark:bg-red-950/20' : ''}`}
                           >
                             <meta.icon className={`mt-0.5 h-4.5 w-4.5 shrink-0 ${meta.cls}`} />
                             <div className="min-w-0">
@@ -271,7 +284,7 @@ export default function DashboardLayout({ role = 'donor' }) {
                                 {n.message}
                               </p>
                               <p className="mt-0.5 text-[11px] text-gray-400 dark:text-slate-500">
-                                {new Date(n.created_at).toLocaleString()}
+                                {n.time}
                               </p>
                             </div>
                           </li>

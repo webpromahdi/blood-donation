@@ -74,6 +74,8 @@ try {
         return [
             'id' => $req['id'],
             'request_code' => $req['request_code'],
+            'requester_type' => $req['requester_type'],
+            'requester_id' => $req['requester_id'],
             'patient_name' => $req['patient_name'],
             'patient_age' => $req['patient_age'],
             'blood_type' => $req['blood_type'],

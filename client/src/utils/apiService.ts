@@ -28,6 +28,9 @@ async function req<T>(url: string, opts?: RequestInit): Promise<T> {
   const data = await res.json()
 
   if (!res.ok) {
+    if (res.status === 401 && !url.includes('login') && !url.includes('register')) {
+      window.location.href = '/login'
+    }
     const error: ApiError = { status: res.status, success: false, message: 'Request failed', ...data }
     throw error
   }

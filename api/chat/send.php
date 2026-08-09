@@ -90,7 +90,8 @@ try {
     // ROLE-BASED CHAT PERMISSION VALIDATION
     // ========================================
     
-    $canChat = false;
+    // User requested to remove chat restrictions so anyone can chat with anyone
+    $canChat = true;
     
     // Rule 1: Admin can chat with anyone
     if ($currentUserRole === 'admin') {

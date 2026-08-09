@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, ChevronRight } from 'lucide-react'
+import { Search, ChevronRight, ClipboardList, Clock, XCircle, CheckCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import PageHeader from '../../components/shared/PageHeader'
 import Input from '../../components/ui/Input'
@@ -82,10 +82,64 @@ export default function Tracking() {
     return true;
   })
 
+  // Summary Metrics
+  const totalCount = requests.length
+  const activeCount = requests.filter(r => !['completed', 'cancelled', 'rejected'].includes(r.lifecycle_status || r.status)).length
+  const rejectedCount = requests.filter(r => ['cancelled', 'rejected'].includes(r.lifecycle_status || r.status)).length
+  const completedCount = requests.filter(r => (r.lifecycle_status || r.status) === 'completed').length
+
   return (
     <div>
       <PageHeader title="Track Requests" subtitle="Monitor the status of your blood requests." />
       
+      {/* Summary Cards */}
+      <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-4">
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-[var(--shadow-card)] dark:border-slate-700 dark:bg-slate-800">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="mb-1 text-sm text-gray-600 dark:text-gray-400">Total Requests</p>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{totalCount}</h2>
+            </div>
+            <div className="rounded-lg bg-blue-100 p-3 dark:bg-blue-900/50">
+              <ClipboardList className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+            </div>
+          </div>
+        </div>
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-[var(--shadow-card)] dark:border-slate-700 dark:bg-slate-800">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="mb-1 text-sm text-gray-600 dark:text-gray-400">Active</p>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{activeCount}</h2>
+            </div>
+            <div className="rounded-lg bg-yellow-100 p-3 dark:bg-yellow-900/50">
+              <Clock className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+            </div>
+          </div>
+        </div>
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-[var(--shadow-card)] dark:border-slate-700 dark:bg-slate-800">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="mb-1 text-sm text-gray-600 dark:text-gray-400">Rejected</p>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{rejectedCount}</h2>
+            </div>
+            <div className="rounded-lg bg-red-100 p-3 dark:bg-red-900/50">
+              <XCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+            </div>
+          </div>
+        </div>
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-[var(--shadow-card)] dark:border-slate-700 dark:bg-slate-800">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="mb-1 text-sm text-gray-600 dark:text-gray-400">Completed</p>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{completedCount}</h2>
+            </div>
+            <div className="rounded-lg bg-purple-100 p-3 dark:bg-purple-900/50">
+              <CheckCircle className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
           {['All', 'Pending', 'Approved', 'Assigned', 'Completed', 'Cancelled'].map(f => (

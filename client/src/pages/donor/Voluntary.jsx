@@ -24,6 +24,7 @@ export default function Voluntary() {
   const [scheduled, setScheduled] = useState(null)
   const [appointments, setAppointments] = useState([])
   const [hospitals, setHospitals] = useState([])
+  const [eligibility, setEligibility] = useState(null)
   const [initialLoading, setInitialLoading] = useState(true)
   const [cancelId, setCancelId] = useState(null)
   const [cancelling, setCancelling] = useState(false)
@@ -34,9 +35,10 @@ export default function Voluntary() {
 
   const fetchData = async () => {
     try {
-      const [apptsRes, hospRes] = await Promise.all([
+      const [apptsRes, hospRes, eligRes] = await Promise.all([
         api.get('/donor/voluntary/list.php'),
-        api.get('/donor/hospitals/list.php')
+        api.get('/donor/hospitals/list.php'),
+        api.get('/donor/eligibility.php')
       ])
       
       if (apptsRes.success) {
@@ -45,6 +47,10 @@ export default function Voluntary() {
       
       if (hospRes.success) {
         setHospitals(hospRes.hospitals || [])
+      }
+
+      if (eligRes.success) {
+        setEligibility(eligRes)
       }
     } catch (err) {
       console.error('Failed to load data:', err)
@@ -177,6 +183,29 @@ export default function Voluntary() {
               <h2 className="mb-5 text-lg font-semibold text-gray-900 dark:text-slate-100">
                 Schedule a Voluntary Donation
               </h2>
+
+              {eligibility && (!eligibility.eligible || eligibility.has_active_request) && (
+                <div className="mb-6 rounded-md border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-950/40">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                    <div>
+                      <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                        Not Eligible for Voluntary Donation
+                      </h3>
+                      <p className="mt-1 text-sm text-amber-700 dark:text-amber-400">
+                        {eligibility.has_active_request
+                          ? 'You already have an active voluntary donation request. Please wait for it to be completed or cancelled.'
+                          : `You need to wait ${eligibility.days_until_eligible} more days before you can donate again.`}
+                      </p>
+                      {eligibility.next_eligible_date && !eligibility.has_active_request && (
+                        <p className="mt-2 text-sm font-medium text-amber-800 dark:text-amber-300">
+                          Next eligible date: {new Date(eligibility.next_eligible_date).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
               
               {errors.general && (
                 <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-950/40">
@@ -184,7 +213,7 @@ export default function Voluntary() {
                 </div>
               )}
 
-              <div className="space-y-4">
+              <div className={`space-y-4 ${eligibility && (!eligibility.eligible || eligibility.has_active_request) ? 'pointer-events-none opacity-60' : ''}`}>
                 <Select
                   label="Hospital"
                   name="hospital_id"
@@ -231,6 +260,7 @@ export default function Voluntary() {
                   variant="primary"
                   fullWidth
                   loading={loading}
+                  disabled={eligibility && (!eligibility.eligible || eligibility.has_active_request)}
                 >
                   Schedule Donation
                 </Button>

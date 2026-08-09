@@ -7,9 +7,8 @@ import Input from '../../components/ui/Input'
 import Select from '../../components/ui/Select'
 import Badge from '../../components/ui/Badge'
 import Table, { Td } from '../../components/ui/Table'
-import Modal from '../../components/ui/Modal'
 import { useToast } from '../../components/ui/Toast'
-import { BLOOD_GROUPS, DONATION_TYPES } from '../../utils/constants'
+import { BLOOD_GROUPS } from '../../utils/constants'
 import { api } from '../../utils/apiService'
 
 const STATUS_VARIANT = {
@@ -32,17 +31,6 @@ export default function Appointments() {
   const [status, setStatus] = useState('All')
   const [search, setSearch] = useState('')
 
-  const [modalOpen, setModalOpen] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
-  const [form, setForm] = useState({
-    donorName: '',
-    date: '',
-    time: '',
-    bloodGroup: BLOOD_GROUPS[0],
-    type: DONATION_TYPES[0],
-    units: 1,
-    notes: '',
-  })
 
   useEffect(() => {
     fetchAppointments()
@@ -99,40 +87,7 @@ export default function Appointments() {
     }
   }
 
-  const openModal = () => {
-    setForm({
-      donorName: '',
-      date: '',
-      time: '',
-      bloodGroup: BLOOD_GROUPS[0],
-      type: DONATION_TYPES[0],
-      units: 1,
-      notes: '',
-    })
-    setModalOpen(true)
-  }
 
-  const submit = () => {
-    setSubmitting(true)
-    setTimeout(() => {
-      setSubmitting(false)
-      setModalOpen(false)
-      toast('Appointment scheduled successfully.', { type: 'success' })
-      // Simulate adding to list
-      setAppointments([
-        {
-          id: 'APT-NEW',
-          date: form.date,
-          time: form.time,
-          donor: { name: form.donorName, blood_group: form.bloodGroup },
-          status: 'Scheduled',
-          notes: form.notes,
-          source: 'Manual'
-        },
-        ...appointments
-      ])
-    }, 1500)
-  }
 
   const columns = [
     { key: 'donor', label: 'Donor Info' },
@@ -148,11 +103,6 @@ export default function Appointments() {
       <PageHeader
         title="Appointments"
         subtitle="Manage scheduled donations and confirm arrivals."
-        actions={
-          <Button variant="primary" onClick={openModal}>
-            <Plus className="h-4 w-4" /> Schedule New
-          </Button>
-        }
       />
 
       <div className="rounded-md border border-gray-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
@@ -262,75 +212,6 @@ export default function Appointments() {
           )
         }}
       />
-
-      {/* Manual Schedule Modal */}
-      <Modal
-        open={modalOpen}
-        onClose={() => !submitting && setModalOpen(false)}
-        title="Schedule Manual Appointment"
-        size="md"
-        footer={
-          <>
-            <Button variant="ghost" onClick={() => setModalOpen(false)} disabled={submitting}>
-              Cancel
-            </Button>
-            <Button variant="primary" onClick={submit} loading={submitting}>
-              Schedule
-            </Button>
-          </>
-        }
-      >
-        <div className="space-y-4 pt-4">
-          <Input
-            label="Donor Name / ID"
-            value={form.donorName}
-            onChange={(e) => setForm({ ...form, donorName: e.target.value })}
-            required
-          />
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Select
-              label="Blood Group"
-              options={BLOOD_GROUPS}
-              value={form.bloodGroup}
-              onChange={(e) => setForm({ ...form, bloodGroup: e.target.value })}
-            />
-            <Select
-              label="Donation Type"
-              options={DONATION_TYPES}
-              value={form.type}
-              onChange={(e) => setForm({ ...form, type: e.target.value })}
-            />
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Input
-              label="Date"
-              type="date"
-              value={form.date}
-              onChange={(e) => setForm({ ...form, date: e.target.value })}
-              required
-            />
-            <Input
-              label="Time"
-              type="time"
-              value={form.time}
-              onChange={(e) => setForm({ ...form, time: e.target.value })}
-              required
-            />
-          </div>
-          <div className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">
-              Notes / Instructions
-            </label>
-            <textarea
-              className="w-full rounded-md border border-gray-300 bg-white p-2 text-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-              rows={3}
-              placeholder="E.g., Require fasting..."
-              value={form.notes}
-              onChange={(e) => setForm({ ...form, notes: e.target.value })}
-            />
-          </div>
-        </div>
-      </Modal>
     </div>
   )
 }

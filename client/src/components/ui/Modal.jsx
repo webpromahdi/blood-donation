@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 
 const SIZES = {
@@ -49,7 +50,7 @@ export default function Modal({
 
   if (!render) return null
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
       <div
         className={`absolute inset-0 bg-slate-900/50 backdrop-blur-sm ${isClosing ? 'fade-out' : 'fade-in'}`}
@@ -86,6 +87,7 @@ export default function Modal({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

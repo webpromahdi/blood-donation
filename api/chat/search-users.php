@@ -111,7 +111,7 @@ function searchChattableUsers(PDO $conn, int $currentUserId, array $allowedRoles
             u.role,
             u.status,
             CASE 
-                WHEN u.role = 'donor' THEN (SELECT blood_type FROM donors WHERE user_id = u.id LIMIT 1)
+                WHEN u.role = 'donor' THEN (SELECT bg.blood_type FROM donors d JOIN blood_groups bg ON d.blood_group_id = bg.id WHERE d.user_id = u.id LIMIT 1)
                 ELSE NULL
             END as blood_type,
             CASE 

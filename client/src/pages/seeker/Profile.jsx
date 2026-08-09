@@ -60,13 +60,22 @@ export default function Profile() {
     }
   }
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault()
     setSaving(true)
-    setTimeout(() => {
+    try {
+      const res = await api.put('/seeker/profile.php', form)
+      if (res.success) {
+        toast('Profile updated successfully!', { type: 'success' })
+      } else {
+        toast(res.message || 'Failed to update profile', { type: 'error' })
+      }
+    } catch (err) {
+      console.error(err)
+      toast('Error saving profile', { type: 'error' })
+    } finally {
       setSaving(false)
-      toast('Profile updated successfully!', { type: 'success' })
-    }, 1000)
+    }
   }
 
   const handlePasswordChange = async (e) => {
