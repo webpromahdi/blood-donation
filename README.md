@@ -104,8 +104,8 @@ BloodConnect provides a centralized, real-time platform that instantly matches b
 │       └─────────────┴─────────────┴─────────────┘               │
 │                          │                                       │
 │              ┌───────────▼───────────┐                          │
-│              │   Vanilla JavaScript  │                          │
-│              │   + Tailwind CSS      │                          │
+│              │       React 19        │                          │
+│              │   + Tailwind CSS 4    │                          │
 │              └───────────┬───────────┘                          │
 └──────────────────────────┼──────────────────────────────────────┘
                            │ HTTP/JSON
@@ -146,13 +146,12 @@ BloodConnect provides a centralized, real-time platform that instantly matches b
 
 | Layer                  | Technology                                         |
 | ---------------------- | -------------------------------------------------- |
-| **Frontend**           | HTML5, Tailwind CSS 4.0, Vanilla JavaScript (ES6+) |
-| **Icons**              | Lucide Icons                                       |
-| **Validation**         | Zod (client-side schema validation)                |
+| **Frontend**           | React 19, React Router v7, Tailwind CSS 4.0        |
+| **Icons**              | Lucide-React                                       |
 | **Backend**            | PHP 8.0+                                           |
 | **Database**           | MySQL 8.0 / MariaDB 10.4+                          |
 | **Authentication**     | PHP Sessions with bcrypt password hashing          |
-| **Development Server** | Vite (for Tailwind compilation)                    |
+| **Development Server** | Vite                                               |
 | **Production Server**  | Apache (XAMPP/LAMP/WAMP)                           |
 
 ---
@@ -381,6 +380,7 @@ cd blood-donation-main
 ### 🔸 Step 2: Install Dependencies
 
 ```bash
+cd client
 npm install
 ```
 
@@ -413,21 +413,24 @@ private $password = '';  // Default XAMPP password
 ### 🔸 Step 5: Start Development Server
 
 ```bash
-# 🚀 For Tailwind CSS compilation (development)
+# 🚀 Run the Vite development server
+cd client
 npm run dev
 
 # 🚀 Access the application
 # 🚀 http://localhost:5173 (Vite dev server)
+# 🚀 Make sure XAMPP Apache & MySQL are running in the background!
 ```
 
 ### 🔸 Step 6: Production Setup
 
 ```bash
-# 🚀 Build CSS for production
+# 🚀 Build for production
+cd client
 npm run build
 
 # 🚀 Access via Apache
-# 🚀 http://localhost/blood-donation-main
+# 🚀 http://localhost/blood-donation-main/client/dist
 ```
 
 ---
