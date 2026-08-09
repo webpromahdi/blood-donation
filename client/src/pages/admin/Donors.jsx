@@ -54,54 +54,24 @@ function StatChip({ label, value, tone }) {
   )
 }
 
-function ActionsMenu({ donor, onAction }) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef(null)
-
-  const close = () => setOpen(false)
-
-  const items = [
-    donor.status === 'pending' && { key: 'approve', label: 'Approve', icon: Check },
-    donor.status !== 'rejected' && { key: 'reject', label: 'Reject', icon: X },
-  ].filter(Boolean)
-
-  if (items.length === 0) return null
-
+const ActionButtons = ({ donor, onAction }) => {
   return (
-    <div className="relative flex justify-end" ref={ref}>
+    <div className="flex justify-end gap-2">
       <button
-        onClick={() => setOpen((o) => !o)}
-        className="rounded-md p-1.5 text-gray-500 transition-colors hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-slate-700"
-        aria-label="Actions"
+        onClick={() => onAction('view', donor)}
+        className="flex items-center gap-1 rounded-md border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
       >
-        <MoreVertical className="h-4 w-4" />
+        <Eye className="h-3.5 w-3.5" />
+        View
       </button>
-      {open && (
-        <>
-          <div className="fixed inset-0 z-10" onClick={close} />
-          <div className="absolute right-0 top-9 z-20 w-44 overflow-hidden rounded-md border border-gray-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800">
-            {items.map((item) => {
-              const Icon = item.icon
-              return (
-                <button
-                  key={item.key}
-                  onClick={() => {
-                    close()
-                    onAction(item.key, donor)
-                  }}
-                  className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 ${
-                    item.danger
-                      ? 'text-red-600 dark:text-red-400'
-                      : 'text-gray-700 dark:text-slate-300'
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  {item.label}
-                </button>
-              )
-            })}
-          </div>
-        </>
+      {donor.status === 'pending' && (
+        <button
+          onClick={() => onAction('approve', donor)}
+          className="flex items-center gap-1 rounded-md bg-green-600 px-2.5 py-1.5 text-xs font-medium text-white transition-colors hover:bg-green-700"
+        >
+          <Check className="h-3.5 w-3.5" />
+          Approve
+        </button>
       )}
     </div>
   )
@@ -358,7 +328,7 @@ export default function Donors() {
               {d.registered_at ? new Date(d.registered_at).toLocaleDateString() : '—'}
             </Td>
             <Td>
-              <ActionsMenu donor={d} onAction={openModal} />
+              <ActionButtons donor={d} onAction={openModal} />
             </Td>
           </>
         )}
@@ -425,6 +395,90 @@ export default function Donors() {
           placeholder="Provide a reason for rejecting this donor…"
           className="w-full resize-none rounded-md border border-gray-300 bg-white p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500/40 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
         />
+      </Modal>
+
+      {/* View Details */}
+      <Modal
+        open={modal === 'view'}
+        onClose={closeModal}
+        title="Donor Details"
+        size="lg"
+        footer={
+          <div className="flex items-center justify-end w-full gap-2">
+            <Button variant="ghost" onClick={closeModal}>
+              Close
+            </Button>
+            {selected?.status === 'pending' && (
+              <>
+                <Button variant="danger" onClick={() => setModal('reject')}>Reject</Button>
+                <Button variant="primary" onClick={() => setModal('approve')}>Approve</Button>
+              </>
+            )}
+          </div>
+        }
+      >
+        {selected && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-4 border-b border-gray-100 pb-4 dark:border-slate-700">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-100 text-xl font-bold text-red-700 dark:bg-red-950/60 dark:text-red-300">
+                {initials(selected.name)}
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-slate-100">{selected.name}</h3>
+                <p className="text-sm text-gray-500 dark:text-slate-400">{selected.email}</p>
+                <div className="mt-1 flex items-center gap-2">
+                  <Badge variant={STATUS_VARIANT[selected.status] || 'neutral'} size="sm">
+                    {(selected.status || 'unknown').toUpperCase()}
+                  </Badge>
+                  <BloodGroupBadge group={selected.blood_group} size="sm" />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="block text-xs text-gray-500 dark:text-slate-400">Phone</span>
+                <span className="font-medium text-gray-900 dark:text-slate-200">{selected.phone || '—'}</span>
+              </div>
+              <div>
+                <span className="block text-xs text-gray-500 dark:text-slate-400">City / Location</span>
+                <span className="font-medium text-gray-900 dark:text-slate-200">{selected.city || '—'}</span>
+              </div>
+              <div>
+                <span className="block text-xs text-gray-500 dark:text-slate-400">Age</span>
+                <span className="font-medium text-gray-900 dark:text-slate-200">{selected.age ? `${selected.age} Years` : '—'}</span>
+              </div>
+              <div>
+                <span className="block text-xs text-gray-500 dark:text-slate-400">Gender</span>
+                <span className="font-medium text-gray-900 dark:text-slate-200 capitalize">{selected.gender || '—'}</span>
+              </div>
+              <div>
+                <span className="block text-xs text-gray-500 dark:text-slate-400">Weight</span>
+                <span className="font-medium text-gray-900 dark:text-slate-200">{selected.weight ? `${selected.weight} kg` : '—'}</span>
+              </div>
+              <div>
+                <span className="block text-xs text-gray-500 dark:text-slate-400">Total Donations</span>
+                <span className="font-medium text-gray-900 dark:text-slate-200">{selected.total_donations || 0}</span>
+              </div>
+              <div>
+                <span className="block text-xs text-gray-500 dark:text-slate-400">Last Donation Date</span>
+                <span className="font-medium text-gray-900 dark:text-slate-200">
+                  {selected.last_donation_date ? new Date(selected.last_donation_date).toLocaleDateString() : 'Never'}
+                </span>
+              </div>
+              <div>
+                <span className="block text-xs text-gray-500 dark:text-slate-400">Registered Date</span>
+                <span className="font-medium text-gray-900 dark:text-slate-200">
+                  {selected.registered_at ? new Date(selected.registered_at).toLocaleDateString() : '—'}
+                </span>
+              </div>
+              <div className="col-span-2">
+                <span className="block text-xs text-gray-500 dark:text-slate-400">Full Address</span>
+                <span className="font-medium text-gray-900 dark:text-slate-200">{selected.address || '—'}</span>
+              </div>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   )

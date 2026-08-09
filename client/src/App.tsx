@@ -38,6 +38,7 @@ const AdminDonors = lazy(() => import('./pages/admin/Donors'))
 const AdminHospitals = lazy(() => import('./pages/admin/Hospitals'))
 const AdminVoluntary = lazy(() => import('./pages/admin/Voluntary'))
 const AdminBloodGroups = lazy(() => import('./pages/admin/BloodGroups'))
+const AdminRequests = lazy(() => import('./pages/admin/Requests'))
 const AdminReports = lazy(() => import('./pages/admin/Reports'))
 const AdminAnnouncements = lazy(() => import('./pages/admin/Announcements'))
 const AdminChat = lazy(() => import('./pages/admin/Chat'))
@@ -129,6 +130,7 @@ export default function App() {
           <Route path="/admin/hospitals" element={<AdminHospitals />} />
           <Route path="/admin/voluntary" element={<AdminVoluntary />} />
           <Route path="/admin/blood-groups" element={<AdminBloodGroups />} />
+          <Route path="/admin/requests" element={<AdminRequests />} />
           <Route path="/admin/reports" element={<AdminReports />} />
           <Route path="/admin/announcements" element={<AdminAnnouncements />} />
           <Route path="/admin/chat" element={<AdminChat />} />

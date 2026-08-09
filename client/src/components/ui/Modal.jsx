@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 
 const SIZES = {
@@ -19,8 +19,25 @@ export default function Modal({
   footer,
 }) {
   const visible = isOpen ?? open
+  const [render, setRender] = useState(visible)
+  const [isClosing, setIsClosing] = useState(false)
+
   useEffect(() => {
-    if (!visible) return
+    if (visible) {
+      setRender(true)
+      setIsClosing(false)
+    } else if (render) {
+      setIsClosing(true)
+      const timer = setTimeout(() => {
+        setRender(false)
+        setIsClosing(false)
+      }, 250) // match animation duration
+      return () => clearTimeout(timer)
+    }
+  }, [visible, render])
+
+  useEffect(() => {
+    if (!render) return
     const onKey = (e) => e.key === 'Escape' && onClose?.()
     document.addEventListener('keydown', onKey)
     document.body.style.overflow = 'hidden'
@@ -28,20 +45,20 @@ export default function Modal({
       document.removeEventListener('keydown', onKey)
       document.body.style.overflow = ''
     }
-  }, [visible, onClose])
+  }, [render, onClose])
 
-  if (!visible) return null
+  if (!render) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
       <div
-        className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+        className={`absolute inset-0 bg-slate-900/50 backdrop-blur-sm ${isClosing ? 'fade-out' : 'fade-in'}`}
         onClick={onClose}
       />
       <div
-        className={`fade-in relative z-10 w-full ${SIZES[size] || SIZES.md} rounded-md border border-gray-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-800`}
+        className={`relative z-10 flex max-h-[calc(100vh-2rem)] flex-col w-full ${SIZES[size] || SIZES.md} rounded-xl border border-gray-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-800 ${isClosing ? 'modal-out' : 'modal-in'}`}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-gray-100 dark:border-slate-700 px-6 py-4">
+        <div className="flex shrink-0 items-start justify-between gap-4 border-b border-gray-100 dark:border-slate-700 px-6 py-4">
           <div>
             {title && (
               <h3 className="text-base font-semibold text-gray-900 dark:text-slate-100">
@@ -56,15 +73,15 @@ export default function Modal({
           </div>
           <button
             onClick={onClose}
-            className="rounded-md p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-slate-700"
+            className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-slate-700"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="px-6 py-5">{children}</div>
+        <div className="flex-1 overflow-y-auto px-6 py-5">{children}</div>
         {footer && (
-          <div className="flex justify-end gap-3 border-t border-gray-100 dark:border-slate-700 px-6 py-4">
+          <div className="flex shrink-0 justify-end gap-3 border-t border-gray-100 dark:border-slate-700 px-6 py-4">
             {footer}
           </div>
         )}

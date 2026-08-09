@@ -91,21 +91,25 @@ export default function Profile() {
   const saveProfile = async (e) => {
     e.preventDefault()
     setSavingProfile(true)
-    
     try {
-      // NOTE: Update API endpoint doesn't exist yet, so we mock success
-      // await api.post('/donor/profile/update.php', { ...personal, is_available: available })
-      
-      setTimeout(() => {
-        setSavingProfile(false)
-        toast('Your profile details have been saved.', {
-          type: 'success',
-          title: 'Profile updated',
-        })
-      }, 1000)
+      const data = await api.post('/donor/profile/update.php', {
+        name: personal.fullName,
+        phone: personal.phone,
+        city: personal.district,
+        address: personal.address,
+        gender: personal.gender,
+        is_available: available ? 1 : 0,
+      })
+      if (data.success) {
+        toast('Your profile details have been saved.', { type: 'success', title: 'Profile updated' })
+        fetchProfile()
+      } else {
+        toast(data.message || 'Failed to update profile.', { type: 'error' })
+      }
     } catch (err) {
+      toast('Network error occurred.', { type: 'error' })
+    } finally {
       setSavingProfile(false)
-      toast('Failed to update profile.', { type: 'error' })
     }
   }
 
@@ -116,20 +120,21 @@ export default function Profile() {
     e.preventDefault()
     if (mismatch || !pw.current || !pw.next) return
     setSavingPw(true)
-    
     try {
-      // NOTE: Password update endpoint doesn't exist yet, mock success
-      setTimeout(() => {
-        setSavingPw(false)
+      const data = await api.post('/donor/profile/change-password.php', {
+        current_password: pw.current,
+        new_password: pw.next,
+      })
+      if (data.success) {
         setPw({ current: '', next: '', confirm: '' })
-        toast('Your password has been changed.', {
-          type: 'success',
-          title: 'Password updated',
-        })
-      }, 1000)
+        toast('Your password has been changed.', { type: 'success', title: 'Password updated' })
+      } else {
+        toast(data.message || 'Failed to change password.', { type: 'error' })
+      }
     } catch (err) {
+      toast('Network error occurred.', { type: 'error' })
+    } finally {
       setSavingPw(false)
-      toast('Failed to change password.', { type: 'error' })
     }
   }
 

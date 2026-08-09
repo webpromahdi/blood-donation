@@ -3,12 +3,8 @@ require_once __DIR__ . '/../config/cors.php';
 /**
  * Hospital List Requests Endpoint
  * GET /api/hospital/requests.php
- * Returns all blood requests for the logged-in hospital
- * 
- * Normalized Schema: Uses requester_id + requester_type for polymorphic relation,
- *                    blood_groups.blood_type, JOINs donations -> donors -> users for donor info
+ * Returns all blood requests for the logged-in hospital and all pending seeker requests
  */
-
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -53,7 +49,6 @@ try {
         exit;
     }
 
-    // Query with normalized schema - use requester_id + requester_type
     $sql = "SELECT r.*, bg.blood_type,
                    dn.id as donation_id, dn.status as donation_status, dn.donor_id,
                    dn.accepted_at, dn.started_at, dn.reached_at, dn.completed_at,
@@ -65,11 +60,14 @@ try {
             LEFT JOIN donors d ON dn.donor_id = d.id
             LEFT JOIN users donor_user ON d.user_id = donor_user.id
             LEFT JOIN blood_groups donor_bg ON d.blood_group_id = donor_bg.id
-            WHERE r.requester_id = ? AND r.requester_type = 'hospital'
+            WHERE (r.requester_id = ? AND r.requester_type = 'hospital')
+               OR (r.requester_type = 'seeker' AND r.status = 'pending')
+               OR (r.requester_type = 'seeker' AND r.hospital_id = ?)
+               OR (r.requester_type = 'seeker' AND dn.id IS NOT NULL AND dn.status != 'cancelled')
             ORDER BY r.urgency DESC, r.created_at DESC";
 
     $stmt = $conn->prepare($sql);
-    $stmt->execute([$userId]);
+    $stmt->execute([$userId, $hospital['id']]);
     $requests = $stmt->fetchAll();
 
     $formattedRequests = array_map(function ($req) {
@@ -106,20 +104,17 @@ try {
     $stats = [
         'total' => count($formattedRequests),
         'pending' => count(array_filter($formattedRequests, fn($r) => $r['status'] === 'pending')),
-        'active' => count(array_filter($formattedRequests, fn($r) => in_array($r['status'], ['approved', 'in_progress']))),
-        'completed' => count(array_filter($formattedRequests, fn($r) => $r['status'] === 'completed')),
-        'emergency' => count(array_filter($formattedRequests, fn($r) => $r['urgency'] === 'emergency' && !in_array($r['status'], ['completed', 'rejected'])))
+        'in_progress' => count(array_filter($formattedRequests, fn($r) => $r['status'] === 'in_progress')),
+        'completed' => count(array_filter($formattedRequests, fn($r) => $r['status'] === 'completed'))
     ];
 
     echo json_encode([
         'success' => true,
-        'requests' => $formattedRequests,
-        'stats' => $stats
+        'stats' => $stats,
+        'requests' => $formattedRequests
     ]);
-
-} catch (PDOException $e) {
-    error_log("Hospital Requests Error: " . $e->getMessage());
+} catch (Exception $e) {
+    error_log("Error fetching hospital requests: " . $e->getMessage());
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Failed to fetch requests']);
 }
-

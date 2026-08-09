@@ -27,6 +27,7 @@ import {
   X,
   LogOut,
   Droplets,
+  Clock,
 } from 'lucide-react'
 import ThemeToggle from '../shared/ThemeToggle'
 import { useAuth } from '../../context/AuthContext'
@@ -52,12 +53,12 @@ const NAV = {
     { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/admin/donors', label: 'Donors', icon: Users },
     { to: '/admin/hospitals', label: 'Hospitals', icon: Building2 },
+    { to: '/admin/requests', label: 'Manage Blood Requests', icon: ClipboardList },
     { to: '/admin/voluntary', label: 'Voluntary Camps', icon: HandHeart },
     { to: '/admin/blood-groups', label: 'Blood Inventory', icon: Droplets },
     { to: '/admin/reports', label: 'Reports', icon: BarChart3 },
     { to: '/admin/announcements', label: 'Announcements', icon: Megaphone },
     { to: '/admin/chat', label: 'Messages', icon: MessageSquare },
-    { to: '/admin/notifications', label: 'Notifications', icon: Bell },
     { to: '/admin/profile', label: 'Profile', icon: User },
   ],
   hospital: [
@@ -337,7 +338,29 @@ export default function DashboardLayout({ role = 'donor' }) {
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <div className="mx-auto max-w-7xl fade-in">
-            <Outlet />
+            {user?.status === 'pending' ? (
+              <div className="flex min-h-[60vh] flex-col items-center justify-center p-8 text-center">
+                <div className="w-full max-w-2xl rounded-xl border border-yellow-200 bg-white p-8 shadow-sm dark:border-yellow-900/50 dark:bg-slate-800">
+                  <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/30">
+                    <Clock className="h-10 w-10 text-yellow-600 dark:text-yellow-500" />
+                  </div>
+                  <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-slate-100">
+                    Account Under Review
+                  </h2>
+                  <p className="mb-6 text-gray-600 dark:text-slate-400">
+                    Your account is currently pending approval. Please wait for admin review before you can access the full dashboard and start using the platform.
+                  </p>
+                  <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-left dark:border-yellow-900/50 dark:bg-yellow-900/10">
+                    <p className="text-sm text-yellow-800 dark:text-yellow-400 flex items-start gap-2">
+                      <Info className="h-4 w-4 shrink-0 mt-0.5" />
+                      <span>This usually takes 24-48 hours. You will be notified once your account is approved.</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <Outlet />
+            )}
           </div>
         </main>
       </div>

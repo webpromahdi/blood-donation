@@ -27,6 +27,7 @@ import BloodGroupBadge from '../../components/shared/BloodGroupBadge'
 import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
 import Table, { Td } from '../../components/ui/Table'
+import Modal from '../../components/ui/Modal'
 import { api } from '../../utils/apiService'
 
 ChartJS.register(
@@ -63,6 +64,8 @@ export default function AdminDashboard() {
   const [requests, setRequests] = useState([])
   const [donors, setDonors] = useState([])
   const [loading, setLoading] = useState(true)
+  const [modal, setModal] = useState(null)
+  const [selected, setSelected] = useState(null)
 
   useEffect(() => {
     Promise.all([
@@ -145,6 +148,21 @@ export default function AdminDashboard() {
     return <div className="p-8 text-center text-gray-500">Loading admin dashboard...</div>
   }
 
+  const handleUpdateStatus = async (id, status) => {
+    try {
+      const res = await api.post('/admin/requests/update-status.php', {
+        request_id: id,
+        status: status,
+      })
+      if (res.success) {
+        setRequests(requests.map(r => r.id === id ? { ...r, status: status } : r))
+        // optionally show toast
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   return (
     <div>
       <PageHeader
@@ -162,7 +180,7 @@ export default function AdminDashboard() {
         <div className="mb-6 flex items-center gap-3 rounded-md border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/60 dark:bg-amber-950/40">
           <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
           <p className="text-sm text-amber-800 dark:text-amber-200">
-            <strong>{(stats?.pending_donors || 0) + (stats?.pending_hospitals || 0)} pending approvals</strong>
+            <strong>{(stats?.pending_donors || 0) + (stats?.pending_hospitals || 0)} pending account approvals</strong>
             {' '}— {stats?.pending_donors || 0} donor(s), {stats?.pending_hospitals || 0} hospital(s)
           </p>
           <div className="ml-auto flex gap-2">
@@ -181,6 +199,67 @@ export default function AdminDashboard() {
         <StatCard icon={Droplet} label="Donations this month" value={stats?.completed_this_month || 0} />
         <StatCard icon={Building2} label="Partner hospitals" value={stats?.total_hospitals || 0} />
         <StatCard icon={Activity} label="Open requests" value={stats?.emergency_requests || 0} />
+      </div>
+
+      {/* Pending Blood Requests */}
+      <div className="mt-6 rounded-md border border-gray-200 bg-white shadow-[var(--shadow-card)] dark:border-slate-700 dark:bg-slate-800">
+        <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-slate-700">
+          <div>
+            <h3 className="font-semibold text-gray-900 dark:text-slate-100">
+              Pending Blood Requests
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-slate-400">
+              Requests waiting for admin approval
+            </p>
+          </div>
+        </div>
+        <Table columns={requestColumns} emptyMessage="No pending requests found.">
+          {requests.filter(r => r.status === 'pending').slice(0, 5).map((req) => (
+            <tr key={req.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 dark:border-slate-700/50 dark:hover:bg-slate-800/50">
+              <Td>
+                <div className="font-medium text-gray-900 dark:text-slate-100">
+                  {req.request_code}
+                </div>
+                <div className="text-xs text-gray-500 dark:text-slate-400">
+                  {formatTime(req.created_at)}
+                </div>
+              </Td>
+              <Td>
+                <div className="font-medium text-gray-900 dark:text-slate-100">
+                  {req.patient_name}
+                </div>
+                <div className="text-xs text-gray-500 dark:text-slate-400">
+                  {req.quantity} Unit(s)
+                </div>
+              </Td>
+              <Td><BloodGroupBadge bloodGroup={req.blood_type} /></Td>
+              <Td>
+                <span className="text-sm text-gray-700 dark:text-slate-300">
+                  {req.hospital_name}
+                </span>
+                <span className="block text-xs text-gray-500">{req.city}</span>
+              </Td>
+              <Td>
+                <Badge variant={req.urgency === 'emergency' ? 'danger' : 'success'}>
+                  {req.urgency}
+                </Badge>
+              </Td>
+              <Td>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="secondary" onClick={() => { setSelected(req); setModal('view') }}>
+                    View
+                  </Button>
+                  <Button size="sm" onClick={() => handleUpdateStatus(req.id, 'approved')}>
+                    Approve
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => handleUpdateStatus(req.id, 'rejected')}>
+                    Reject
+                  </Button>
+                </div>
+              </Td>
+            </tr>
+          ))}
+        </Table>
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
@@ -299,7 +378,15 @@ export default function AdminDashboard() {
                 <Badge tone={URGENCY_TONE[r.urgency] || 'gray'} size="sm" dot className="capitalize">
                   {r.urgency}
                 </Badge>
-                <span className="shrink-0 text-xs text-gray-400 dark:text-slate-500">{formatTime(r.created_at)}</span>
+                <div className="flex shrink-0 flex-col items-end gap-1">
+                  <span className="text-xs text-gray-400 dark:text-slate-500">{formatTime(r.created_at)}</span>
+                  <button
+                    onClick={() => { setSelected(r); setModal('view'); }}
+                    className="flex items-center gap-1 rounded text-[10px] font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                  >
+                    View
+                  </button>
+                </div>
               </li>
             ))}
             {requests.length === 0 && (
@@ -308,6 +395,65 @@ export default function AdminDashboard() {
           </ul>
         </div>
       </div>
+
+      {/* View Details Modal */}
+      <Modal
+        open={modal === 'view'}
+        onClose={() => { setModal(null); setSelected(null); }}
+        title="Blood Request Details"
+        size="lg"
+        footer={
+          <div className="flex items-center justify-end w-full gap-2">
+            <Button variant="ghost" onClick={() => { setModal(null); setSelected(null); }}>
+              Close
+            </Button>
+            {selected?.status === 'pending' && (
+              <>
+                <Button variant="danger" onClick={() => handleUpdateStatus(selected.id, 'rejected')}>Reject</Button>
+                <Button variant="primary" onClick={() => handleUpdateStatus(selected.id, 'approved')}>Approve</Button>
+              </>
+            )}
+          </div>
+        }
+      >
+        {selected && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-4 border-b border-gray-100 pb-4 dark:border-slate-700">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-100 text-xl font-bold text-red-700 dark:bg-red-950/60 dark:text-red-300">
+                <Droplet className="h-8 w-8" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-slate-100">Patient: {selected.patient_name}</h3>
+                <p className="text-sm text-gray-500 dark:text-slate-400">Request Code: {selected.request_code}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <Badge variant={STATUS_TONE[selected.status] || 'neutral'} size="sm" className="capitalize">
+                    {selected.status.replace('_', ' ')}
+                  </Badge>
+                  <BloodGroupBadge group={selected.blood_type} size="sm" />
+                  <Badge variant={URGENCY_TONE[selected.urgency] || 'neutral'} size="sm" dot>
+                    {selected.urgency}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="block text-xs text-gray-500 dark:text-slate-400">Quantity Needed</span>
+                <span className="font-medium text-gray-900 dark:text-slate-200">{selected.quantity} Unit(s)</span>
+              </div>
+              <div>
+                <span className="block text-xs text-gray-500 dark:text-slate-400">Hospital</span>
+                <span className="font-medium text-gray-900 dark:text-slate-200">{selected.hospital_name || '—'}</span>
+              </div>
+              <div>
+                <span className="block text-xs text-gray-500 dark:text-slate-400">City</span>
+                <span className="font-medium text-gray-900 dark:text-slate-200">{selected.city || '—'}</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   )
 }

@@ -3,6 +3,7 @@ import {
   Search,
   Filter,
   MoreVertical,
+  Eye,
   Check,
   X,
   ChevronDown,
@@ -47,45 +48,24 @@ function StatChip({ label, value, tone }) {
   )
 }
 
-function ActionsMenu({ hospital, onAction }) {
-  const [open, setOpen] = useState(false)
-  const close = () => setOpen(false)
-
-  const items = [
-    hospital.status === 'pending' && { key: 'approve', label: 'Approve', icon: Check },
-    hospital.status !== 'rejected' && { key: 'reject', label: 'Reject', icon: X },
-  ].filter(Boolean)
-
-  if (items.length === 0) return null
-
+const ActionButtons = ({ hospital, onAction }) => {
   return (
-    <div className="relative flex justify-end">
+    <div className="flex justify-end gap-2">
       <button
-        onClick={() => setOpen((o) => !o)}
-        className="rounded-md p-1.5 text-gray-500 transition-colors hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-slate-700"
-        aria-label="Actions"
+        onClick={() => onAction('view', hospital)}
+        className="flex items-center gap-1 rounded-md border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
       >
-        <MoreVertical className="h-4 w-4" />
+        <Eye className="h-3.5 w-3.5" />
+        View
       </button>
-      {open && (
-        <>
-          <div className="fixed inset-0 z-10" onClick={close} />
-          <div className="absolute right-0 top-9 z-20 w-44 overflow-hidden rounded-md border border-gray-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800">
-            {items.map((item) => {
-              const Icon = item.icon
-              return (
-                <button
-                  key={item.key}
-                  onClick={() => { close(); onAction(item.key, hospital) }}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-slate-300 dark:hover:bg-slate-700"
-                >
-                  <Icon className="h-4 w-4" />
-                  {item.label}
-                </button>
-              )
-            })}
-          </div>
-        </>
+      {hospital.status === 'pending' && (
+        <button
+          onClick={() => onAction('approve', hospital)}
+          className="flex items-center gap-1 rounded-md bg-green-600 px-2.5 py-1.5 text-xs font-medium text-white transition-colors hover:bg-green-700"
+        >
+          <Check className="h-3.5 w-3.5" />
+          Approve
+        </button>
       )}
     </div>
   )
@@ -301,7 +281,7 @@ export default function Hospitals() {
               </Badge>
             </Td>
             <Td>
-              <ActionsMenu hospital={h} onAction={openModal} />
+              <ActionButtons hospital={h} onAction={openModal} />
             </Td>
           </>
         )}
@@ -342,6 +322,104 @@ export default function Hospitals() {
           placeholder="Reason for rejection…"
           className="w-full resize-none rounded-md border border-gray-300 bg-white p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500/40 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
         />
+      </Modal>
+
+      {/* View Details */}
+      <Modal
+        open={modal === 'view'}
+        onClose={closeModal}
+        title="Hospital Details"
+        size="lg"
+        footer={
+          <div className="flex items-center justify-end w-full gap-2">
+            <Button variant="ghost" onClick={closeModal}>
+              Close
+            </Button>
+            {selected?.status === 'pending' && (
+              <>
+                <Button variant="danger" onClick={() => setModal('reject')}>Reject</Button>
+                <Button variant="primary" onClick={() => setModal('approve')}>Approve</Button>
+              </>
+            )}
+          </div>
+        }
+      >
+        {selected && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-4 border-b border-gray-100 pb-4 dark:border-slate-700">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-100 text-xl font-bold text-red-700 dark:bg-red-950/60 dark:text-red-300">
+                <Building2 className="h-8 w-8" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-slate-100">{selected.name}</h3>
+                <p className="text-sm text-gray-500 dark:text-slate-400">{selected.email}</p>
+                <div className="mt-1 flex items-center gap-2">
+                  <Badge variant={STATUS_VARIANT[selected.status] || 'neutral'} size="sm">
+                    {(selected.status || 'unknown').toUpperCase()}
+                  </Badge>
+                  {selected.has_blood_bank === 1 && (
+                    <Badge variant="primary" size="sm">Blood Bank Available</Badge>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="block text-xs text-gray-500 dark:text-slate-400">Registration Number</span>
+                <span className="font-medium text-gray-900 dark:text-slate-200">{selected.registration_number || '—'}</span>
+              </div>
+              <div>
+                <span className="block text-xs text-gray-500 dark:text-slate-400">Hospital Type</span>
+                <span className="font-medium text-gray-900 dark:text-slate-200 capitalize">{selected.hospital_type || '—'}</span>
+              </div>
+              <div>
+                <span className="block text-xs text-gray-500 dark:text-slate-400">Phone</span>
+                <span className="font-medium text-gray-900 dark:text-slate-200">{selected.phone || '—'}</span>
+              </div>
+              <div>
+                <span className="block text-xs text-gray-500 dark:text-slate-400">Contact Person</span>
+                <span className="font-medium text-gray-900 dark:text-slate-200">{selected.contact_person || '—'}</span>
+              </div>
+              <div>
+                <span className="block text-xs text-gray-500 dark:text-slate-400">City / State</span>
+                <span className="font-medium text-gray-900 dark:text-slate-200">{selected.city || '—'} {selected.state ? `, ${selected.state}` : ''}</span>
+              </div>
+              <div>
+                <span className="block text-xs text-gray-500 dark:text-slate-400">Pincode</span>
+                <span className="font-medium text-gray-900 dark:text-slate-200">{selected.pincode || '—'}</span>
+              </div>
+              <div>
+                <span className="block text-xs text-gray-500 dark:text-slate-400">Website</span>
+                <span className="font-medium text-blue-600 dark:text-blue-400">
+                  {selected.website ? <a href={selected.website.startsWith('http') ? selected.website : `https://${selected.website}`} target="_blank" rel="noreferrer">{selected.website}</a> : '—'}
+                </span>
+              </div>
+              <div>
+                <span className="block text-xs text-gray-500 dark:text-slate-400">Registered Date</span>
+                <span className="font-medium text-gray-900 dark:text-slate-200">
+                  {selected.created_at ? new Date(selected.created_at).toLocaleDateString() : '—'}
+                </span>
+              </div>
+              <div>
+                <span className="block text-xs text-gray-500 dark:text-slate-400">License Expiry</span>
+                <span className="font-medium text-gray-900 dark:text-slate-200">
+                  {selected.license_expiry_date ? new Date(selected.license_expiry_date).toLocaleDateString() : '—'}
+                </span>
+              </div>
+              <div>
+                <span className="block text-xs text-gray-500 dark:text-slate-400">Total / Pending Requests</span>
+                <span className="font-medium text-gray-900 dark:text-slate-200">
+                  {selected.total_requests || 0} / {selected.pending_requests || 0}
+                </span>
+              </div>
+              <div className="col-span-2">
+                <span className="block text-xs text-gray-500 dark:text-slate-400">Full Address</span>
+                <span className="font-medium text-gray-900 dark:text-slate-200">{selected.address || '—'}</span>
+              </div>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   )

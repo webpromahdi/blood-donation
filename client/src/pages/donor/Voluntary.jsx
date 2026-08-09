@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
-import { CheckCircle, Calendar, Clock, MapPin, Droplet } from 'lucide-react'
+import { CheckCircle, Calendar, Clock, MapPin, Droplet, AlertTriangle } from 'lucide-react'
 import PageHeader from '../../components/shared/PageHeader'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import Select from '../../components/ui/Select'
 import Badge from '../../components/ui/Badge'
+import Modal from '../../components/ui/Modal'
 import { DONATION_TYPES } from '../../utils/constants'
 import { api } from '../../utils/apiService'
 
@@ -12,7 +13,7 @@ const EMPTY = {
   hospital_id: '',
   date: '',
   time: '',
-  blood_group_id: '', // Added this, normally you'd use donor's blood group implicitly, but we'll see if the API needs it. Actually the PHP endpoint might just use donor's own BG.
+  blood_group_id: '',
   notes: '',
 }
 
@@ -24,6 +25,8 @@ export default function Voluntary() {
   const [appointments, setAppointments] = useState([])
   const [hospitals, setHospitals] = useState([])
   const [initialLoading, setInitialLoading] = useState(true)
+  const [cancelId, setCancelId] = useState(null)
+  const [cancelling, setCancelling] = useState(false)
 
   useEffect(() => {
     fetchData()
@@ -103,18 +106,19 @@ export default function Voluntary() {
     setScheduled(null)
   }
 
-  const cancelAppointment = async (id) => {
-    if (!window.confirm('Are you sure you want to cancel this appointment?')) return
-    
+  const cancelAppointment = async () => {
+    if (!cancelId) return
+    setCancelling(true)
     try {
-      const data = await api.post('/donor/voluntary/cancel.php', { donation_id: id })
+      const data = await api.post('/donor/voluntary/cancel.php', { voluntary_id: cancelId })
       if (data.success) {
-        fetchData() // Refresh list
-      } else {
-        alert(data.message || 'Failed to cancel appointment.')
+        fetchData()
       }
     } catch (err) {
-      alert('Network error occurred.')
+      console.error('Cancel error:', err)
+    } finally {
+      setCancelling(false)
+      setCancelId(null)
     }
   }
 
@@ -278,7 +282,7 @@ export default function Voluntary() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => cancelAppointment(a.id)}
+                        onClick={() => setCancelId(a.id)}
                       >
                         Cancel
                       </Button>
@@ -290,6 +294,33 @@ export default function Voluntary() {
           )}
         </div>
       </div>
+
+      {/* Cancel Confirmation Modal */}
+      <Modal
+        isOpen={!!cancelId}
+        onClose={() => setCancelId(null)}
+        title="Cancel Appointment"
+        size="sm"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setCancelId(null)}>Keep it</Button>
+            <Button
+              className="border-none bg-red-600 text-white hover:bg-red-700"
+              onClick={cancelAppointment}
+              disabled={cancelling}
+            >
+              {cancelling ? 'Cancelling...' : 'Yes, cancel'}
+            </Button>
+          </>
+        }
+      >
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-yellow-600" />
+          <p className="text-sm text-gray-700 dark:text-slate-300">
+            Are you sure you want to cancel this appointment? This action cannot be undone.
+          </p>
+        </div>
+      </Modal>
     </div>
   )
 }

@@ -77,21 +77,9 @@ export default function Appointments() {
   }, [appointments, fromDate, toDate, bloodGroup, status, search])
 
   const setStatusFor = async (apt, nextStatus) => {
-    const isVoluntary = !!apt.voluntary_id
-    if (!isVoluntary) {
-      // Mock for non-voluntary since there is no endpoint implemented yet
-      setAppointments((list) =>
-        list.map((a) => (a.id === apt.id ? { ...a, status: nextStatus === 'completed' ? 'Completed' : 'Cancelled' } : a))
-      )
-      toast(`Appointment marked as ${nextStatus === 'completed' ? 'Completed' : 'Cancelled'}.`, {
-        type: nextStatus === 'cancelled' ? 'warning' : 'success',
-      })
-      return
-    }
-
     try {
-      const res = await api.post('/hospital/voluntary/update-status.php', {
-        voluntary_id: apt.voluntary_id,
+      const res = await api.put('/hospital/appointments.php', {
+        id: apt.id,
         status: nextStatus
       })
 
@@ -106,7 +94,8 @@ export default function Appointments() {
         toast(res.message || 'Failed to update status', { type: 'error' })
       }
     } catch (err) {
-      toast('Error updating appointment status', { type: 'error' })
+      console.error(err)
+      toast('An error occurred', { type: 'error' })
     }
   }
 

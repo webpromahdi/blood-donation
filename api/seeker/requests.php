@@ -54,12 +54,14 @@ try {
     $sql = "SELECT r.*, bg.blood_type,
                    dn.id as donation_id, dn.status as donation_status, dn.donor_id,
                    dn.accepted_at, dn.started_at, dn.reached_at, dn.completed_at,
-                   donor_user.id as donor_user_id, donor_user.name as donor_name, donor_user.phone as donor_phone
+                   donor_user.id as donor_user_id, donor_user.name as donor_name, donor_user.phone as donor_phone,
+                   donor_bg.blood_type as donor_blood_group
             FROM blood_requests r
             JOIN blood_groups bg ON r.blood_group_id = bg.id
             LEFT JOIN donations dn ON r.id = dn.request_id AND dn.status != 'cancelled'
             LEFT JOIN donors d ON dn.donor_id = d.id
             LEFT JOIN users donor_user ON d.user_id = donor_user.id
+            LEFT JOIN blood_groups donor_bg ON d.blood_group_id = donor_bg.id
             WHERE r.requester_id = ? AND r.requester_type = 'seeker'
             ORDER BY r.created_at DESC";
 
@@ -89,7 +91,8 @@ try {
                 'status' => $req['donation_status'],
                 'donor_user_id' => $req['donor_user_id'],
                 'donor_name' => $req['donor_name'],
-                'donor_phone' => $req['donation_status'] === 'on_the_way' || $req['donation_status'] === 'reached' ? $req['donor_phone'] : null,
+                'donor_blood_group' => $req['donor_blood_group'],
+                'donor_phone' => $req['donation_status'] === 'on_the_way' || $req['donation_status'] === 'reached' || $req['donation_status'] === 'in_progress' || $req['donation_status'] === 'accepted' ? $req['donor_phone'] : null,
                 'accepted_at' => $req['accepted_at'],
                 'started_at' => $req['started_at'],
                 'reached_at' => $req['reached_at'],

@@ -73,11 +73,11 @@ export default function RequestDetails() {
     { time: request.created_at, title: 'Request Submitted', desc: 'Request broadcasted.' }
   ]
   if (request.approved_at) {
-    timeline.unshift({ time: request.approved_at, title: 'Under Review', desc: 'Request has been approved by admin.' })
+    timeline.unshift({ time: request.approved_at, title: 'Searching Donor', desc: 'Request has been approved and broadcasted.' })
   }
   if (request.donation) {
     if (request.donation.accepted_at) {
-      timeline.unshift({ time: request.donation.accepted_at, title: 'Donor Matched', desc: `${request.donation.donor_name} accepted the request.` })
+      timeline.unshift({ time: request.donation.accepted_at, title: 'Donor Assigned', desc: `${request.donation.donor_name} accepted the request.` })
     }
     if (request.donation.started_at) {
       timeline.unshift({ time: request.donation.started_at, title: 'Donor On the Way', desc: 'Donor is on the way to the hospital.' })
@@ -86,20 +86,21 @@ export default function RequestDetails() {
       timeline.unshift({ time: request.donation.reached_at, title: 'Donor Reached', desc: 'Donor reached the hospital.' })
     }
     if (request.donation.completed_at) {
-      timeline.unshift({ time: request.donation.completed_at, title: 'Donation Completed', desc: 'Blood donation was successfully completed.' })
+      timeline.unshift({ time: request.donation.completed_at, title: 'Completed', desc: 'Blood donation was successfully completed.' })
     }
   }
 
   const statusLabel = {
-    pending: 'Submitted',
-    approved: 'Under Review',
-    donor_assigned: 'Matched',
-    on_the_way: 'Matched (On the way)',
-    reached: 'Matched (Reached)',
-    completed: 'Fulfilled',
+    pending: 'Under Admin Review',
+    approved: 'Searching for Donor',
+    in_progress: 'Donor Assigned',
+    donor_assigned: 'Donor Assigned',
+    on_the_way: 'Donor On the way',
+    reached: 'Donor Reached',
+    completed: 'Completed',
     cancelled: 'Cancelled',
     rejected: 'Rejected'
-  }[request.lifecycle_status] || request.lifecycle_status
+  }[request.lifecycle_status || request.status] || request.lifecycle_status
 
   return (
     <div>
@@ -130,25 +131,25 @@ export default function RequestDetails() {
           </div>
         </div>
 
-        {['cancelled', 'rejected'].includes(request.lifecycle_status) ? (
+        {['cancelled', 'rejected'].includes(request.lifecycle_status || request.status) ? (
           <div className="pt-8 pb-4 text-center text-sm font-medium text-red-500">
-            This request was {request.lifecycle_status}.
+            This request was {request.lifecycle_status || request.status}.
           </div>
         ) : (
           <div className="pt-8 pb-4">
             <div className="relative flex justify-between">
               <div className="absolute left-0 top-6 h-0.5 w-full -translate-y-1/2 border-t-2 border-dashed border-gray-200 dark:border-slate-700" />
-              {['Submitted', 'Under Review', 'Matched', 'Fulfilled'].map((step, i) => {
+              {['Submitted', 'Searching Donor', 'Donor Assigned', 'On the Way', 'Reached', 'Completed'].map((step, i) => {
                 const stepNum = i + 1;
                 const isPast = stepNum < progress;
                 const isCurrent = stepNum === progress;
                 return (
-                  <div key={step} className="relative z-10 flex flex-col items-center bg-white px-4 dark:bg-slate-800 w-1/4 text-center">
+                  <div key={step} className="relative z-10 flex flex-col items-center bg-white px-4 dark:bg-slate-800 w-1/6 text-center">
                     <div className={`mb-3 flex h-12 w-12 items-center justify-center rounded-full ${isPast ? 'bg-red-600 text-white' : isCurrent ? 'bg-red-600 text-white ring-4 ring-red-100 dark:ring-red-900/50' : 'bg-gray-100 text-gray-400 dark:bg-slate-700'}`}>
                       {stepNum}
                     </div>
-                    <span className={`text-sm font-medium ${isCurrent ? 'text-red-600' : 'text-gray-600 dark:text-gray-400'}`}>{step}</span>
-                    {isCurrent && <span className="mt-1 text-xs text-gray-500 dark:text-gray-500">Current Phase</span>}
+                    <span className={`text-[11px] sm:text-xs font-medium leading-tight ${isCurrent ? 'text-red-600' : 'text-gray-600 dark:text-gray-400'}`}>{step}</span>
+                    {isCurrent && <span className="mt-1 text-[10px] text-gray-500 dark:text-gray-500">Current Phase</span>}
                   </div>
                 )
               })}

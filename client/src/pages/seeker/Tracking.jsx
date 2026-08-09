@@ -41,22 +41,24 @@ export default function Tracking() {
     switch (lifecycleStatus) {
       case 'pending': return 1;
       case 'approved': return 2;
-      case 'donor_assigned':
-      case 'on_the_way':
-      case 'reached': return 3;
-      case 'completed': return 4;
+      case 'in_progress':
+      case 'donor_assigned': return 3;
+      case 'on_the_way': return 4;
+      case 'reached': return 5;
+      case 'completed': return 6;
       default: return 0;
     }
   }
 
   const getStatusLabel = (lifecycleStatus) => {
     switch (lifecycleStatus) {
-      case 'pending': return 'Submitted';
-      case 'approved': return 'Under Review';
-      case 'donor_assigned': return 'Matched';
-      case 'on_the_way': return 'Matched (On the way)';
-      case 'reached': return 'Matched (Reached)';
-      case 'completed': return 'Fulfilled';
+      case 'pending': return 'Under Admin Review';
+      case 'approved': return 'Searching for Donor';
+      case 'in_progress':
+      case 'donor_assigned': return 'Donor Assigned';
+      case 'on_the_way': return 'Donor On the way';
+      case 'reached': return 'Donor Reached';
+      case 'completed': return 'Completed';
       case 'cancelled': return 'Cancelled';
       case 'rejected': return 'Rejected';
       default: return lifecycleStatus;
@@ -65,11 +67,10 @@ export default function Tracking() {
 
   const filtered = requests.filter(r => {
     if (filter !== 'All') {
-      const displayStatus = getStatusLabel(r.lifecycle_status);
-      // Simplify logic for filtering: Match substring or exact based on filter name
       if (filter === 'Pending' && r.lifecycle_status !== 'pending') return false;
-      if (filter === 'Matched' && !['donor_assigned', 'on_the_way', 'reached'].includes(r.lifecycle_status)) return false;
-      if (filter === 'Fulfilled' && r.lifecycle_status !== 'completed') return false;
+      if (filter === 'Approved' && r.lifecycle_status !== 'approved') return false;
+      if (filter === 'Assigned' && !['in_progress', 'donor_assigned', 'on_the_way', 'reached'].includes(r.lifecycle_status)) return false;
+      if (filter === 'Completed' && r.lifecycle_status !== 'completed') return false;
       if (filter === 'Cancelled' && !['cancelled', 'rejected'].includes(r.lifecycle_status)) return false;
     }
     if (searchTerm) {
@@ -87,7 +88,7 @@ export default function Tracking() {
       
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
-          {['All', 'Pending', 'Matched', 'Fulfilled', 'Cancelled'].map(f => (
+          {['All', 'Pending', 'Approved', 'Assigned', 'Completed', 'Cancelled'].map(f => (
             <button key={f} onClick={() => setFilter(f)} className={`whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium transition-colors ${filter === f ? 'bg-red-600 text-white' : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-800 dark:text-gray-300 dark:hover:bg-slate-700'}`}>
               {f}
             </button>
@@ -109,8 +110,8 @@ export default function Tracking() {
       ) : (
         <div className="space-y-4">
           {filtered.map(req => {
-            const progress = getProgress(req.lifecycle_status);
-            const statusLabel = getStatusLabel(req.lifecycle_status);
+            const progress = getProgress(req.lifecycle_status || req.status);
+            const statusLabel = getStatusLabel(req.lifecycle_status || req.status);
             const statusColor = STATUS_COLORS[req.status] || 'neutral';
 
             return (
@@ -124,15 +125,15 @@ export default function Tracking() {
                   <Badge variant={statusColor} className="capitalize">{statusLabel}</Badge>
                 </div>
                 
-                {['cancelled', 'rejected'].includes(req.lifecycle_status) ? (
+                {['cancelled', 'rejected'].includes(req.lifecycle_status || req.status) ? (
                   <div className="py-6 text-center text-sm font-medium text-red-500">
-                    This request was {req.lifecycle_status}.
+                    This request was {(req.lifecycle_status || req.status)}.
                   </div>
                 ) : (
                   <div className="py-6">
                     <div className="relative flex justify-between">
                       <div className="absolute left-0 top-1/2 h-0.5 w-full -translate-y-1/2 border-t-2 border-dashed border-gray-200 dark:border-slate-700" />
-                      {['Submitted', 'Under Review', 'Matched', 'Fulfilled'].map((step, i) => {
+                      {['Submitted', 'Approved', 'Assigned', 'On the Way', 'Reached', 'Completed'].map((step, i) => {
                         const stepNum = i + 1;
                         const isPast = stepNum < progress;
                         const isCurrent = stepNum === progress;
