@@ -137,6 +137,11 @@ try {
     // Lives saved estimate (1 donation = 1 life as per requirement)
     $livesSaved = $totalDonations;
 
+    // Calculate donor rank based on total donations
+    $stmt = $conn->prepare("SELECT COUNT(*) + 1 as rank FROM donors WHERE total_donations > ?");
+    $stmt->execute([$totalDonations]);
+    $rank = $stmt->fetch()['rank'];
+
     echo json_encode([
         'success' => true,
         'profile' => [
@@ -159,6 +164,7 @@ try {
         'stats' => [
             'total_donations' => (int) $totalDonations,
             'lives_saved' => (int) $livesSaved,
+            'rank' => (int) $rank,
             'last_donation' => $lastDonationDate,
             'next_eligible' => $nextEligible,
             'is_eligible' => $isEligible,

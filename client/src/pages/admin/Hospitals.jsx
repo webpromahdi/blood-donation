@@ -163,13 +163,7 @@ export default function Hospitals() {
       }
       if (data?.success) {
         toast(data.message || 'Action completed', { type: 'success' })
-        setHospitals((prev) =>
-          prev.map((h) =>
-            h.id === selected.id
-              ? { ...h, status: modal === 'approve' ? 'approved' : 'rejected' }
-              : h
-          )
-        )
+        fetchHospitals()
         closeModal()
       } else {
         toast(data?.message || 'Action failed', { type: 'error' })

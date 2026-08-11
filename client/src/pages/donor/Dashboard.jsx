@@ -142,8 +142,8 @@ export default function DonorDashboard() {
       } else {
         toast(res.message || 'Could not accept the request.', { title: 'Failed', type: 'error' })
       }
-    } catch {
-      toast('Network error. Please try again.', { title: 'Error', type: 'error' })
+    } catch (err) {
+      toast(err?.message || 'Network error. Please try again.', { title: 'Error', type: 'error' })
     } finally {
       setAcceptingId(null)
     }
@@ -166,8 +166,8 @@ export default function DonorDashboard() {
       } else {
         toast(res.message || 'Could not update status.', { title: 'Failed', type: 'error' })
       }
-    } catch {
-      toast('Network error.', { title: 'Error', type: 'error' })
+    } catch (err) {
+      toast(err?.message || 'Network error.', { title: 'Error', type: 'error' })
     } finally {
       setUpdatingStatus(false)
     }
@@ -206,8 +206,8 @@ export default function DonorDashboard() {
       } else {
         toast(res.message || 'Could not cancel donation.', { title: 'Failed', type: 'error' })
       }
-    } catch {
-      toast('Network error.', { title: 'Error', type: 'error' })
+    } catch (err) {
+      toast(err?.message || 'Network error.', { title: 'Error', type: 'error' })
     } finally {
       setCancellingDonation(false)
     }
@@ -265,7 +265,7 @@ export default function DonorDashboard() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard icon={HeartPulse} label="Total Donations" value={stats?.total_donations || 0} />
-        <StatCard icon={Award} label="Lives Saved (Est.)" value={(stats?.total_donations || 0) * 3} />
+        <StatCard icon={Award} label="Lives Saved (Est.)" value={stats?.lives_saved || stats?.total_donations || 0} />
         <StatCard 
           icon={CalendarClock} 
           label="Next Eligible Date" 

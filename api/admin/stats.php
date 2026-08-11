@@ -69,6 +69,10 @@ try {
     $stmt = $conn->query("SELECT COUNT(*) as count FROM donations WHERE status = 'completed' AND MONTH(completed_at) = MONTH(CURRENT_DATE()) AND YEAR(completed_at) = YEAR(CURRENT_DATE())");
     $completedThisMonth = $stmt->fetch()['count'];
 
+    // Total requests across all time
+    $stmt = $conn->query("SELECT COUNT(*) as count FROM blood_requests");
+    $totalRequests = $stmt->fetch()['count'];
+
     // Blood group distribution (from donors table)
     $stmt = $conn->query("
         SELECT bg.blood_type, COUNT(d.id) as count 
@@ -86,6 +90,7 @@ try {
             'total_donors' => (int) $totalDonors,
             'total_hospitals' => (int) $totalHospitals,
             'total_seekers' => (int) $totalSeekers,
+            'total_requests' => (int) $totalRequests,
             'pending_approvals' => (int) $pendingApprovals,
             'pending_donors' => (int) $pendingDonors,
             'pending_hospitals' => (int) $pendingHospitals,

@@ -153,6 +153,8 @@ try {
             'alcohol_consumption' => $healthInfo ? $healthInfo['alcohol_consumption'] : 'none',
             'exercise_frequency' => $healthInfo ? $healthInfo['exercise_frequency'] : 'rarely',
             'last_medical_checkup' => $healthInfo ? $healthInfo['last_medical_checkup'] : null,
+            'allergies_details' => $healthInfo ? $healthInfo['allergies_details'] : null,
+            'medications' => $healthInfo ? $healthInfo['medications'] : null,
             'additional_notes' => $healthInfo ? $healthInfo['additional_notes'] : null,
             'updated_at' => $healthInfo ? $healthInfo['updated_at'] : null
         ],

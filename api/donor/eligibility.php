@@ -40,6 +40,7 @@ try {
     // Get donor profile with last donation info
     $stmt = $conn->prepare("
         SELECT d.id as donor_id, d.last_donation_date, d.next_eligible_date, d.total_donations,
+               d.weight, TIMESTAMPDIFF(YEAR, d.date_of_birth, CURDATE()) as age,
                u.name, u.status as account_status, bg.blood_type
         FROM donors d
         JOIN users u ON d.user_id = u.id
@@ -109,6 +110,28 @@ try {
             $message = "You can donate again after " . $nextDate->format('F d, Y') . " (" . $daysUntilEligible . " days remaining).";
         } else {
             $nextEligibleDate = $today->format('Y-m-d');
+        }
+    }
+
+    if ($isEligible) {
+        if ($donor['age']) {
+            if ($donor['age'] < 18) {
+                $isEligible = false;
+                $reason = 'underage';
+                $message = "You must be at least 18 years old to donate blood. You are currently " . $donor['age'] . " years old.";
+            } elseif ($donor['age'] > 65) {
+                $isEligible = false;
+                $reason = 'overage';
+                $message = "You must be 65 years old or younger to donate blood. You are currently " . $donor['age'] . " years old.";
+            }
+        }
+        
+        if ($isEligible && $donor['weight']) {
+            if ($donor['weight'] < 50) {
+                $isEligible = false;
+                $reason = 'underweight';
+                $message = "You must weigh at least 50 kg to donate blood. Your current weight is " . $donor['weight'] . " kg.";
+            }
         }
     }
 

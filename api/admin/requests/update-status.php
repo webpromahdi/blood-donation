@@ -33,7 +33,7 @@ $requestId = $input['request_id'];
 $status = $input['status'];
 $rejectionReason = $input['rejection_reason'] ?? null;
 
-if (!in_array($status, ['approved', 'rejected'])) {
+if (!in_array($status, ['approved', 'rejected', 'in_progress', 'completed', 'cancelled'])) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Invalid status']);
     exit;
@@ -60,8 +60,9 @@ try {
         throw new Exception('Blood request not found');
     }
 
-    if ($request['status'] !== 'pending') {
-        throw new Exception("Cannot update status. Request is already {$request['status']}");
+    // Admins can update status regardless of current status, except maybe if it's already the same
+    if ($request['status'] === $status) {
+        throw new Exception("Request is already {$status}");
     }
 
     // Update status
@@ -82,17 +83,29 @@ try {
     $stmt->execute($params);
 
     // Add notification to requester
-    $title = $status === 'approved' ? 'Request Approved' : 'Request Rejected';
-    $message = $status === 'approved' 
-        ? "Your blood request has been approved and is now visible to donors." 
-        : "Your blood request was rejected. Reason: " . ($rejectionReason ?? 'Not specified');
+    $title = 'Request Status Updated';
+    $message = "Your blood request status has been updated to {$status}.";
+    $type = 'info';
+
+    if ($status === 'approved') {
+        $title = 'Request Approved';
+        $message = "Your blood request has been approved and is now visible to donors.";
+        $type = 'success';
+    } else if ($status === 'rejected') {
+        $title = 'Request Rejected';
+        $message = "Your blood request was rejected. Reason: " . ($rejectionReason ?? 'Not specified');
+        $type = 'error';
+    } else if ($status === 'completed') {
+        $title = 'Request Completed';
+        $type = 'success';
+    }
 
     $stmt = $conn->prepare("INSERT INTO notifications (user_id, title, message, type, related_type, related_id) VALUES (?, ?, ?, ?, ?, ?)");
     $stmt->execute([
         $request['requester_id'],
         $title,
         $message,
-        $status === 'approved' ? 'success' : 'error',
+        $type,
         'blood_request',
         $requestId
     ]);

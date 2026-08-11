@@ -48,8 +48,15 @@ if (!$conn) {
 }
 
 try {
-    // Get donor_id from donors table
-    $stmt = $conn->prepare("SELECT id, next_eligible_date FROM donors WHERE user_id = ?");
+    // Get donor profile and health data
+    $stmt = $conn->prepare("
+        SELECT d.id, d.next_eligible_date, d.weight, 
+               TIMESTAMPDIFF(YEAR, d.date_of_birth, CURDATE()) as age,
+               dh.has_heart_disease, dh.has_infectious_disease, dh.has_blood_disorders
+        FROM donors d
+        LEFT JOIN donor_health dh ON d.id = dh.donor_id
+        WHERE d.user_id = ?
+    ");
     $stmt->execute([$userId]);
     $donor = $stmt->fetch();
     
@@ -129,6 +136,37 @@ try {
             ]);
             exit;
         }
+    }
+
+    // Check age
+    if ($donor['age']) {
+        if ($donor['age'] < 18 || $donor['age'] > 65) {
+            $conn->rollBack();
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'You must be between 18 and 65 years old to donate blood.']);
+            exit;
+        }
+    }
+
+    // Check weight
+    if ($donor['weight'] === null) {
+        $conn->rollBack();
+        http_response_code(403);
+        echo json_encode(['success' => false, 'message' => 'Please update your weight in your Health profile before accepting a request.']);
+        exit;
+    } elseif ($donor['weight'] < 50) {
+        $conn->rollBack();
+        http_response_code(403);
+        echo json_encode(['success' => false, 'message' => 'You must weigh at least 50 kg to donate blood.']);
+        exit;
+    }
+
+    // Check critical health conditions
+    if ($donor['has_heart_disease'] || $donor['has_infectious_disease'] || $donor['has_blood_disorders']) {
+        $conn->rollBack();
+        http_response_code(403);
+        echo json_encode(['success' => false, 'message' => 'You are not eligible to donate due to medical conditions.']);
+        exit;
     }
 
     // Create donation record

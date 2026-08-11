@@ -69,8 +69,11 @@ try {
     // Get donor info including blood_group_id and last donation date
     $stmt = $conn->prepare("
         SELECT d.id as donor_id, d.blood_group_id, d.city as donor_city, 
-               d.last_donation_date, d.next_eligible_date
+               d.last_donation_date, d.next_eligible_date, d.weight,
+               TIMESTAMPDIFF(YEAR, d.date_of_birth, CURDATE()) as age,
+               dh.has_heart_disease, dh.has_infectious_disease, dh.has_blood_disorders
         FROM donors d 
+        LEFT JOIN donor_health dh ON d.id = dh.donor_id
         WHERE d.user_id = ?
     ");
     $stmt->execute([$_SESSION['user_id']]);
@@ -143,6 +146,33 @@ try {
             'message' => 'You already have an active voluntary donation request. Please wait for it to be completed or cancelled before submitting a new one.',
             'reason' => 'active_request_exists'
         ]);
+        exit;
+    }
+
+    // Check age
+    if ($donor['age']) {
+        if ($donor['age'] < 18 || $donor['age'] > 65) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'You must be between 18 and 65 years old to donate blood.']);
+            exit;
+        }
+    }
+
+    // Check weight
+    if ($donor['weight'] === null) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'message' => 'Please update your weight in your Health profile before submitting a request.']);
+        exit;
+    } elseif ($donor['weight'] < 50) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'message' => 'You must weigh at least 50 kg to donate blood.']);
+        exit;
+    }
+
+    // Check critical health conditions
+    if ($donor['has_heart_disease'] || $donor['has_infectious_disease'] || $donor['has_blood_disorders']) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'message' => 'You are not eligible to donate due to medical conditions.']);
         exit;
     }
     // === END ELIGIBILITY CHECK ===

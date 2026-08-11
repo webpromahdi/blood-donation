@@ -187,14 +187,7 @@ export default function Donors() {
       }
       if (data?.success) {
         toast(data.message || 'Action completed', { type: 'success' })
-        // Update local state optimistically
-        setDonors((prev) =>
-          prev.map((d) =>
-            d.id === selected.id
-              ? { ...d, status: modal === 'approve' ? 'approved' : 'rejected' }
-              : d
-          )
-        )
+        fetchDonors()
         closeModal()
       } else {
         toast(data?.message || 'Action failed', { type: 'error' })

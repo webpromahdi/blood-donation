@@ -82,7 +82,7 @@ export default function Login() {
         setErrors({ general: data.message || 'Google Login failed.' })
       }
     } catch (err) {
-      setErrors({ general: 'Network error. Make sure the server is running.' })
+      setErrors({ general: err?.message || 'Network error. Make sure the server is running.' })
     } finally {
       setIsLoading(false)
     }

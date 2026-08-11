@@ -195,7 +195,7 @@ export default function Profile() {
               <p className="text-xs text-gray-500 dark:text-slate-400">Lives Saved</p>
             </div>
             <div className="px-2">
-              <p className="text-lg font-bold text-gray-900 dark:text-slate-100">#48</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-slate-100">#{profileData?.stats?.rank || '-'}</p>
               <p className="text-xs text-gray-500 dark:text-slate-400">Rank</p>
             </div>
           </div>

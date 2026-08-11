@@ -95,8 +95,8 @@ export default function Health() {
         })
         setConditions(activeConditions)
         
-        setAllergiesDetails(data.health.additional_notes || '') // Note: assuming additional_notes holds allergies details, or we can use allergies_details directly if returned
-        setMedications(data.health.is_on_medication ? 'Yes' : '') // Adjust as needed
+        setAllergiesDetails(data.health.allergies_details || '')
+        setMedications(data.health.medications || '')
         
         // Check eligibility list
         setEligibility([
