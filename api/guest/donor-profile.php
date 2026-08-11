@@ -50,7 +50,7 @@ try {
             d.city as division, 
             d.total_donations as totalDonations, 
             d.is_available as available,
-            d.age
+            d.date_of_birth, TIMESTAMPDIFF(YEAR, d.date_of_birth, CURDATE()) as age
         FROM users u 
         JOIN donors d ON u.id = d.user_id 
         JOIN blood_groups bg ON d.blood_group_id = bg.id 

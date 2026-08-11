@@ -20,8 +20,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     echo json_encode(['success' => false, 'message' => 'Method not allowed']);
     exit;
 }
-
-session_start();
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../middleware/auth.php';
 
@@ -61,7 +59,7 @@ try {
     
     // Build base query with normalized schema
     $baseQuery = "SELECT d.id as donor_id, u.id as user_id, u.name, u.email, u.phone, 
-                         bg.blood_type as blood_group, d.age, d.gender, d.weight, d.city, d.address,
+                         bg.blood_type as blood_group, d.date_of_birth, TIMESTAMPDIFF(YEAR, d.date_of_birth, CURDATE()) as age, d.gender, d.weight, d.city, d.address,
                          u.status, u.created_at, d.total_donations, d.last_donation_date, d.next_eligible_date,
                          dh.has_diabetes, dh.has_hypertension, dh.has_heart_disease, dh.height
                   FROM donors d

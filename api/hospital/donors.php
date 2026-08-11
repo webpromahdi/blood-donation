@@ -19,8 +19,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     echo json_encode(['success' => false, 'message' => 'Method not allowed']);
     exit;
 }
-
-session_start();
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../middleware/auth.php';
 
@@ -58,7 +56,7 @@ try {
     // Using normalized schema: donations -> donors -> users + blood_groups
     // Note: requester_id is the user_id, not the hospital table id
     $sql = "SELECT DISTINCT d.id as donor_id, u.id as user_id, u.name, u.email, u.phone, 
-                   bg.blood_type as blood_group, d.age, d.city,
+                   bg.blood_type as blood_group, d.date_of_birth, TIMESTAMPDIFF(YEAR, d.date_of_birth, CURDATE()) as age, d.city,
                    COUNT(DISTINCT dn.id) as donations_here,
                    MAX(dn.completed_at) as last_donation_here
             FROM donors d
@@ -76,7 +74,7 @@ try {
 
     // Also get donors who are currently assigned to hospital's pending requests
     $sqlActive = "SELECT DISTINCT d.id as donor_id, u.id as user_id, u.name, u.email, u.phone, 
-                         bg.blood_type as blood_group, d.age, d.city,
+                         bg.blood_type as blood_group, d.date_of_birth, TIMESTAMPDIFF(YEAR, d.date_of_birth, CURDATE()) as age, d.city,
                          dn.status as current_status, r.request_code
                   FROM donors d
                   JOIN users u ON d.user_id = u.id
@@ -92,7 +90,7 @@ try {
 
     // Get all donors with their overall stats
     $sqlAll = "SELECT d.id as donor_id, u.id as user_id, u.name, u.email, u.phone, 
-                      bg.blood_type as blood_group, d.age, d.city,
+                      bg.blood_type as blood_group, d.date_of_birth, TIMESTAMPDIFF(YEAR, d.date_of_birth, CURDATE()) as age, d.city,
                       d.total_donations, d.last_donation_date, d.next_eligible_date
                FROM donors d
                JOIN users u ON d.user_id = u.id

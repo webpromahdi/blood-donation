@@ -9,28 +9,10 @@ require_once __DIR__ . '/../config/cors.php';
 
 
 
-// Start session
-session_start();
+require_once __DIR__ . '/../utils/auth_cookie.php';
 
-// Clear all session data
-$_SESSION = [];
-
-// Delete the session cookie
-if (ini_get('session.use_cookies')) {
-    $params = session_get_cookie_params();
-    setcookie(
-        session_name(),
-        '',
-        time() - 42000,
-        $params['path'],
-        $params['domain'],
-        $params['secure'],
-        $params['httponly']
-    );
-}
-
-// Destroy the session
-session_destroy();
+// Clear all auth cookies
+clearAuthCookie();
 
 // Return success response
 echo json_encode([

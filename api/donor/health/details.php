@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/../../config/cors.php';
 /**
  * Get Donor Health Details Endpoint
@@ -26,8 +26,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     echo json_encode(['success' => false, 'message' => 'Method not allowed']);
     exit;
 }
-
-session_start();
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../middleware/auth.php';
 
@@ -90,7 +88,7 @@ try {
     // Get donor basic info from normalized tables (donors + users + blood_groups)
     $stmt = $conn->prepare("
         SELECT d.id as donor_id, u.id as user_id, u.name, u.phone, u.email, 
-               bg.blood_type as blood_group, d.age, d.city, d.total_donations as stored_donations,
+               bg.blood_type as blood_group, d.date_of_birth, TIMESTAMPDIFF(YEAR, d.date_of_birth, CURDATE()) as age, d.city, d.total_donations as stored_donations,
                d.weight as donor_weight, u.created_at
         FROM donors d
         JOIN users u ON d.user_id = u.id

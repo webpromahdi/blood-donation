@@ -67,9 +67,14 @@ export function AuthProvider({ children }) {
 
   const redirectForRole = (role) => REDIRECT[role] || '/login'
 
+  const setSessionUser = (userData) => {
+    setUser(userData)
+    localStorage.setItem('bc_user', JSON.stringify(userData))
+  }
+
   return (
     <AuthContext.Provider
-      value={{ user, loading, isAuthenticated: !!user, login, logout, redirectForRole }}
+      value={{ user, loading, isAuthenticated: !!user, login, logout, redirectForRole, setSessionUser }}
     >
       {children}
     </AuthContext.Provider>

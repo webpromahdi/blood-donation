@@ -27,8 +27,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     echo json_encode(['success' => false, 'message' => 'Method not allowed']);
     exit;
 }
-
-session_start();
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../middleware/auth.php';
 
@@ -280,7 +278,7 @@ function getChartData($conn, $startDate, $endDate) {
     $result['monthly_trends'] = array_values($monthlyData);
     
     // Blood type distribution - use normalized schema with donors and blood_groups tables
-    $stmt = $conn->query(\"
+    $stmt = $conn->query("
         SELECT 
             bg.blood_type,
             COUNT(*) as count

@@ -230,7 +230,7 @@ export default function RequestDetails() {
                     </div>
                   </div>
                 </div>
-                <Link to="/seeker/chat">
+                <Link to={`/seeker/chat?user=${request.donation.donor_user_id}&name=${encodeURIComponent(request.donation.donor_name)}`}>
                   <Button variant="primary">
                     <MessageSquare className="mr-2 h-4 w-4" /> Chat Now
                   </Button>

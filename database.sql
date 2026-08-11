@@ -43,7 +43,10 @@ INSERT INTO blood_groups (blood_type, can_donate_to, can_receive_from, descripti
 CREATE TABLE users (
     id INT PRIMARY KEY AUTO_INCREMENT,
     email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NULL,
+    auth_provider ENUM('credentials', 'google') NOT NULL DEFAULT 'credentials',
+    google_id VARCHAR(255) NULL,
+    avatar VARCHAR(500) NULL,
     name VARCHAR(255) NOT NULL,
     phone VARCHAR(20),
     role ENUM('admin', 'donor', 'hospital', 'seeker') NOT NULL,

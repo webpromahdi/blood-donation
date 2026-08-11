@@ -19,8 +19,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET' && $_SERVER['REQUEST_METHOD'] !== 'PUT'
     echo json_encode(['success' => false, 'message' => 'Method not allowed']);
     exit;
 }
-
-session_start();
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../middleware/auth.php';
 
@@ -117,7 +115,7 @@ try {
                    r.id as request_id, r.request_code, bg.blood_type, r.quantity, r.urgency,
                    r.patient_name, r.required_date,
                    d.id as donor_id, d.user_id as donor_user_id, u.name as donor_name, u.email as donor_email, 
-                   u.phone as donor_phone, donor_bg.blood_type as blood_group, d.age, d.city as donor_city,
+                   u.phone as donor_phone, donor_bg.blood_type as blood_group, d.date_of_birth, TIMESTAMPDIFF(YEAR, d.date_of_birth, CURDATE()) as age, d.city as donor_city,
                    d.gender as donor_gender, d.weight as donor_weight, d.address as donor_address,
                    d.total_donations, d.last_donation_date,
                    -- Donor health info
@@ -145,7 +143,7 @@ try {
                            v.scheduled_date, v.scheduled_time, v.approved_at, v.created_at,
                            bg.blood_type,
                            d.id as donor_id, d.user_id as donor_user_id, u.name as donor_name, u.email as donor_email,
-                           u.phone as donor_phone, donor_bg.blood_type as blood_group, d.age, d.city as donor_city,
+                           u.phone as donor_phone, donor_bg.blood_type as blood_group, d.date_of_birth, TIMESTAMPDIFF(YEAR, d.date_of_birth, CURDATE()) as age, d.city as donor_city,
                            d.gender as donor_gender, d.weight as donor_weight, d.address as donor_address,
                            d.total_donations, d.last_donation_date,
                            -- Donor health info

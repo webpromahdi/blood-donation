@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   Users,
   Heart,
@@ -92,6 +92,7 @@ function CountUp({ value, suffix = '', active }) {
 }
 
 export default function Home() {
+  const navigate = useNavigate()
   const [openFaq, setOpenFaq] = useState(null)
   const [check, setCheck] = useState({ name: '', group: '' })
   const [checked, setChecked] = useState(false)
@@ -545,9 +546,14 @@ export default function Home() {
             </p>
             <form
               className="mx-auto mt-8 flex max-w-2xl flex-col gap-3 sm:flex-row"
-              onSubmit={(e) => e.preventDefault()}
+              onSubmit={(e) => {
+                e.preventDefault()
+                const val = e.target.trackSearch.value.trim()
+                if (val) navigate(`/track-request?q=${encodeURIComponent(val)}`)
+              }}
             >
               <Input
+                name="trackSearch"
                 className="flex-1"
                 icon={Search}
                 placeholder="Request ID or Phone Number"

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/../../config/cors.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
@@ -7,8 +7,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'message' => 'Method not allowed']);
     exit;
 }
-
-session_start();
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../middleware/auth.php';
 
@@ -30,6 +28,7 @@ try {
     if (isset($input['city'])) { $donorFields[] = 'city = ?'; $donorParams[] = trim($input['city']); }
     if (isset($input['address'])) { $donorFields[] = 'address = ?'; $donorParams[] = trim($input['address']); }
     if (isset($input['gender'])) { $donorFields[] = 'gender = ?'; $donorParams[] = trim($input['gender']); }
+    if (isset($input['date_of_birth'])) { $donorFields[] = 'date_of_birth = ?'; $donorParams[] = trim($input['date_of_birth']); }
     if (isset($input['is_available'])) { $donorFields[] = 'is_available = ?'; $donorParams[] = (int)$input['is_available']; }
     if (!empty($donorFields)) { $donorParams[] = $userId; $conn->prepare('UPDATE donors SET ' . implode(', ', $donorFields) . ' WHERE user_id = ?')->execute($donorParams); }
 

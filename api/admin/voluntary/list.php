@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/../../config/cors.php';
 /**
  * Get All Voluntary Donations (Admin)
@@ -17,8 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     echo json_encode(['success' => false, 'message' => 'Method not allowed']);
     exit;
 }
-
-session_start();
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../middleware/auth.php';
 
@@ -55,7 +53,7 @@ try {
             v.created_at,
             bg.blood_type,
             d.id as donor_id,
-            d.age as donor_age,
+            d.date_of_birth, TIMESTAMPDIFF(YEAR, d.date_of_birth, CURDATE()) as donor_age,
             d.total_donations,
             u_donor.id as donor_user_id,
             u_donor.name as donor_name,

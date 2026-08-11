@@ -150,7 +150,7 @@ function getGuestLifecycleStatus($requestStatus, $donationStatus)
     ];
 
     // Use donation status for more specific in_progress states
-    if ($requestStatus === 'in_progress' && $donationStatus) {
+    if ($requestStatus === 'in_progress' || ($requestStatus === 'approved' && $donationStatus)) {
         $donationMap = [
             'accepted' => ['status' => 'donor_assigned', 'label' => 'Donor Assigned', 'message' => 'A donor has accepted the request.'],
             'on_the_way' => ['status' => 'on_the_way', 'label' => 'Donor On the Way', 'message' => 'Donor is on their way to the hospital.'],

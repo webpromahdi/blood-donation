@@ -39,6 +39,5 @@ client/.env
 client/.env.local
 client/.env.*.local
 # AI Agent config
-.opencode/
 AGENTS.md
 .agents/

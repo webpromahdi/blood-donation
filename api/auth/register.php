@@ -34,13 +34,19 @@ require_once __DIR__ . '/../services/NotificationService.php';
 $input = json_decode(file_get_contents('php://input'), true);
 
 // Validate required fields
-$required = ['email', 'password', 'role'];
+$required = ['email', 'role'];
 foreach ($required as $field) {
     if (empty($input[$field])) {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => ucfirst($field) . ' is required']);
         exit;
     }
+}
+
+if (empty($input['password']) && empty($input['google_token'])) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Password or Google token is required']);
+    exit;
 }
 
 // For donors, name is required
@@ -51,7 +57,8 @@ if ($input['role'] === 'donor' && empty($input['name'])) {
 }
 
 $email = filter_var(trim($input['email']), FILTER_SANITIZE_EMAIL);
-$password = $input['password'];
+$password = isset($input['password']) ? $input['password'] : null;
+$googleToken = isset($input['google_token']) ? $input['google_token'] : null;
 $role = $input['role'];
 $name = isset($input['name']) ? trim($input['name']) : '';
 $phone = isset($input['phone']) ? trim($input['phone']) : '';
@@ -71,8 +78,8 @@ if (!in_array($role, $validRoles)) {
     exit;
 }
 
-// Validate password strength (minimum requirements)
-if (strlen($password) < 6) {
+// Validate password strength if using credentials
+if (!$googleToken && strlen($password) < 6) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Password must be at least 6 characters']);
     exit;
@@ -99,8 +106,32 @@ try {
         exit;
     }
 
-    // Hash password with bcrypt
-    $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+    $hashedPassword = null;
+    $authProvider = 'credentials';
+    $googleId = null;
+    $emailVerifiedAt = null;
+
+    if ($googleToken) {
+        $verifyUrl = 'https://oauth2.googleapis.com/tokeninfo?id_token=' . urlencode($googleToken);
+        $response = @file_get_contents($verifyUrl);
+        if ($response === false) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Invalid or expired Google token']);
+            exit;
+        }
+        $googleUser = json_decode($response, true);
+        if (!isset($googleUser['email']) || !isset($googleUser['sub']) || $googleUser['email'] !== $email) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Google token mismatch']);
+            exit;
+        }
+        $authProvider = 'google';
+        $googleId = $googleUser['sub'];
+        $emailVerifiedAt = date('Y-m-d H:i:s');
+    } else {
+        // Hash password with bcrypt
+        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+    }
 
     // Determine initial status based on role
     $status = in_array($role, ['donor', 'hospital']) ? 'pending' : 'approved';
@@ -109,8 +140,8 @@ try {
     $conn->beginTransaction();
 
     // Insert into users table
-    $stmt = $conn->prepare('INSERT INTO users (name, email, password, phone, role, status) VALUES (?, ?, ?, ?, ?, ?)');
-    $stmt->execute([$name, $email, $hashedPassword, $phone, $role, $status]);
+    $stmt = $conn->prepare('INSERT INTO users (name, email, password, phone, role, status, auth_provider, google_id, email_verified_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    $stmt->execute([$name, $email, $hashedPassword, $phone, $role, $status, $authProvider, $googleId, $emailVerifiedAt]);
     $userId = $conn->lastInsertId();
 
     // Insert into role-specific table
@@ -147,14 +178,14 @@ try {
             }
         }
         
-        $age = isset($input['age']) && !empty($input['age']) ? (int) $input['age'] : null;
+        $dob = isset($input['date_of_birth']) && !empty($input['date_of_birth']) ? trim($input['date_of_birth']) : null;
         $weight = isset($input['weight']) && !empty($input['weight']) ? (float) $input['weight'] : null;
         $gender = isset($input['gender']) && !empty($input['gender']) ? trim($input['gender']) : null;
         $city = isset($input['city']) ? trim($input['city']) : null;
         $address = isset($input['address']) ? trim($input['address']) : null;
 
-        $stmt = $conn->prepare('INSERT INTO donors (user_id, blood_group_id, age, weight, gender, city, address) VALUES (?, ?, ?, ?, ?, ?, ?)');
-        $stmt->execute([$userId, $bloodGroupId, $age, $weight, $gender, $city, $address]);
+        $stmt = $conn->prepare('INSERT INTO donors (user_id, blood_group_id, date_of_birth, weight, gender, city, address) VALUES (?, ?, ?, ?, ?, ?, ?)');
+        $stmt->execute([$userId, $bloodGroupId, $dob, $weight, $gender, $city, $address]);
         $donorId = $conn->lastInsertId();
         
         // Initialize donor_health record

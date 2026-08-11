@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/../../config/cors.php';
 /**
  * Get Single Voluntary Donation Details
@@ -16,8 +16,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     echo json_encode(['success' => false, 'message' => 'Method not allowed']);
     exit;
 }
-
-session_start();
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../middleware/auth.php';
 

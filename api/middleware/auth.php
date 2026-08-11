@@ -15,40 +15,44 @@
  * @param array|null $allowedRoles - Optional array of allowed roles
  * @return array|false - Returns user data if authenticated, false otherwise
  */
+require_once __DIR__ . '/../utils/jwt.php';
+require_once __DIR__ . '/../config/jwt_config.php';
+
 function checkAuth($allowedRoles = null)
 {
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-
-    // Session timeout (1 hour)
-    $session_timeout = 3600;
-
-    // Check if logged in
-    if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    // Check if accessToken cookie exists
+    if (!isset($_COOKIE['accessToken'])) {
         return false;
     }
 
-    // Check session timeout
-    if (isset($_SESSION['login_time'])) {
-        if (time() - $_SESSION['login_time'] > $session_timeout) {
-            session_destroy();
-            return false;
-        }
+    $accessToken = $_COOKIE['accessToken'];
+    $payload = JWT::verifyToken($accessToken, JWT_ACCESS_SECRET);
+
+    if (!$payload) {
+        return false; // Invalid or expired token
     }
 
     // Check role if specified
     if ($allowedRoles !== null) {
-        if (!in_array($_SESSION['role'], $allowedRoles)) {
+        if (!in_array($payload['role'], $allowedRoles)) {
             return false;
         }
     }
 
+    // MOCK $_SESSION for legacy endpoints that still rely on it
+    $_SESSION = [
+        'logged_in' => true,
+        'user_id' => $payload['userId'],
+        'email' => $payload['email'],
+        'role' => $payload['role'],
+        'name' => $payload['name']
+    ];
+
     return [
-        'id' => $_SESSION['user_id'],
-        'email' => $_SESSION['email'],
-        'role' => $_SESSION['role'],
-        'name' => $_SESSION['name']
+        'id' => $payload['userId'],
+        'email' => $payload['email'],
+        'role' => $payload['role'],
+        'name' => $payload['name']
     ];
 }
 

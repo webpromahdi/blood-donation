@@ -18,8 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     echo json_encode(['success' => false, 'message' => 'Method not allowed']);
     exit;
 }
-
-session_start();
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../middleware/auth.php';
 
@@ -40,7 +38,7 @@ try {
     // Get donor profile from normalized tables (users + donors + blood_groups)
     $stmt = $conn->prepare("
         SELECT u.id, u.name, u.email, u.phone, u.status, u.created_at,
-               d.id as donor_id, d.age, d.weight, d.gender, d.city, d.address,
+               d.id as donor_id, d.date_of_birth, d.weight, d.gender, d.city, d.address,
                d.is_available, d.total_donations, d.last_donation_date, d.next_eligible_date,
                bg.blood_type as blood_group
         FROM users u
@@ -148,7 +146,7 @@ try {
             'email' => $donor['email'],
             'phone' => $donor['phone'],
             'blood_group' => $donor['blood_group'],
-            'age' => $donor['age'],
+            'date_of_birth' => $donor['date_of_birth'],
             'weight' => $donor['weight'],
             'gender' => $donor['gender'],
             'city' => $donor['city'],

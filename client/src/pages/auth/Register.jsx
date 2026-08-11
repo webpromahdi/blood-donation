@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import {
   ArrowLeft,
   ArrowRight,
@@ -51,6 +51,9 @@ const STRENGTH = [
 export default function Register() {
   const { login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  
+  const googleData = location.state?.googleData || null
 
   const [currentStep, setCurrentStep] = useState(1)
   const [selectedRole, setSelectedRole] = useState(null)
@@ -59,7 +62,7 @@ export default function Register() {
   const [apiError, setApiError] = useState('')
   const [photo, setPhoto] = useState(null)
   const [form, setForm] = useState({
-    fullName: '',
+    fullName: googleData?.name || '',
     dob: '',
     gender: '',
     phone: '',
@@ -74,7 +77,7 @@ export default function Register() {
     license: '',
     hospitalType: '',
     beds: '',
-    email: '',
+    email: googleData?.email || '',
     password: '',
     confirm: '',
     agree: false,
@@ -108,9 +111,12 @@ export default function Register() {
       name: form.fullName || form.hospitalName,
       email: form.email,
       password: form.password,
+      google_token: googleData?.token,
       role: selectedRole === 'hospital' ? 'hospital' : selectedRole,
       phone: form.phone,
       blood_group: form.bloodGroup,
+      date_of_birth: form.dob,
+      gender: form.gender,
       division: form.division,
       district: form.district,
       address: form.address,
@@ -146,14 +152,17 @@ export default function Register() {
               Account Created!
             </h2>
             <p className="mt-2 max-w-sm text-gray-500 dark:text-slate-400">
-              Welcome to BloodConnect. Your account is ready — you can now sign in and
-              start saving lives.
+              {['donor', 'hospital'].includes(selectedRole)
+                ? 'Your account has been created and is currently under review by an Admin. You will be able to log in once approved.'
+                : 'Welcome to BloodConnect. Your account is ready — you can now sign in and start saving lives.'}
             </p>
             <div className="mt-6 flex gap-3">
               <Button as={Link} to="/login" variant="outline">
-                Login here
+                Back to Login
               </Button>
-              <Button onClick={() => navigate('/donor/dashboard')}>Go to dashboard</Button>
+              {!['donor', 'hospital'].includes(selectedRole) && (
+                <Button onClick={() => navigate(`/${selectedRole}/dashboard`)}>Go to dashboard</Button>
+              )}
             </div>
           </div>
         ) : (
@@ -418,41 +427,46 @@ export default function Register() {
                     placeholder="you@example.com"
                     value={form.email}
                     onChange={set('email')}
+                    disabled={!!googleData}
                   />
-                  <div>
-                    <Input
-                      label="Password"
-                      type="password"
-                      placeholder="Create a strong password"
-                      value={form.password}
-                      onChange={set('password')}
-                    />
-                    <div className="mt-2 flex gap-1.5">
-                      {[1, 2, 3, 4].map((seg) => (
-                        <span
-                          key={seg}
-                          className={`h-1.5 flex-1 rounded-md transition-colors ${seg <= strength ? STRENGTH[strength].color : 'bg-gray-200 dark:bg-slate-700'}`}
+                  {!googleData && (
+                    <>
+                      <div>
+                        <Input
+                          label="Password"
+                          type="password"
+                          placeholder="Create a strong password"
+                          value={form.password}
+                          onChange={set('password')}
                         />
-                      ))}
-                    </div>
-                    {form.password && (
-                      <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
-                        Strength: {STRENGTH[strength].label || 'Too short'}
-                      </p>
-                    )}
-                  </div>
-                  <Input
-                    label="Confirm Password"
-                    type="password"
-                    placeholder="Re-enter your password"
-                    value={form.confirm}
-                    onChange={set('confirm')}
-                    error={
-                      form.confirm && form.confirm !== form.password
-                        ? 'Passwords do not match.'
-                        : undefined
-                    }
-                  />
+                        <div className="mt-2 flex gap-1.5">
+                          {[1, 2, 3, 4].map((seg) => (
+                            <span
+                              key={seg}
+                              className={`h-1.5 flex-1 rounded-md transition-colors ${seg <= strength ? STRENGTH[strength].color : 'bg-gray-200 dark:bg-slate-700'}`}
+                            />
+                          ))}
+                        </div>
+                        {form.password && (
+                          <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
+                            Strength: {STRENGTH[strength].label || 'Too short'}
+                          </p>
+                        )}
+                      </div>
+                      <Input
+                        label="Confirm Password"
+                        type="password"
+                        placeholder="Re-enter your password"
+                        value={form.confirm}
+                        onChange={set('confirm')}
+                        error={
+                          form.confirm && form.confirm !== form.password
+                            ? 'Passwords do not match.'
+                            : undefined
+                        }
+                      />
+                    </>
+                  )}
 
                   {/* Photo upload */}
                   <div className="flex flex-col gap-1.5">

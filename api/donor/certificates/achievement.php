@@ -11,7 +11,6 @@ ob_start();
 
 // Start session FIRST before any output or headers
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
 }
 
 // Handle CORS - use specific origin for credentials support

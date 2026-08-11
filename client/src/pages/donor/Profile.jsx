@@ -63,17 +63,19 @@ export default function Profile() {
       if (data.success && data.profile) {
         setProfileData(data)
         const p = data.profile
-        setPersonal({
-          fullName: p.name || '',
-          phone: p.phone || '',
-          email: p.email || '',
-          dob: p.age ? (new Date(new Date().setFullYear(new Date().getFullYear() - p.age))).toISOString().split('T')[0] : '', // rough DOB based on age
-          gender: p.gender || 'Male',
-          division: 'Dhaka', // Default since API might not separate division/district
-          district: p.city || '',
-          address: p.address || '',
-        })
-        setAvailable(!!p.is_available)
+        if (p) {
+          setPersonal({
+            fullName: p.name || '',
+            phone: p.phone || '',
+            email: p.email || '',
+            dob: p.date_of_birth || '',
+            gender: p.gender || 'Male',
+            division: 'Dhaka', // Default since API might not separate division/district
+            district: p.city || '',
+            address: p.address || '',
+          })
+          setAvailable(!!p.is_available)
+        }
       }
     } catch (err) {
       console.error('Failed to load profile:', err)
@@ -98,6 +100,7 @@ export default function Profile() {
         city: personal.district,
         address: personal.address,
         gender: personal.gender,
+        date_of_birth: personal.dob,
         is_available: available ? 1 : 0,
       })
       if (data.success) {

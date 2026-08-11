@@ -16,11 +16,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Start session
-session_start();
-
-// Include database
+// Include database and utils
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../utils/jwt.php';
+require_once __DIR__ . '/../utils/auth_cookie.php';
 
 // Get JSON input
 $input = json_decode(file_get_contents('php://input'), true);
@@ -73,15 +72,27 @@ try {
         exit;
     }
 
-    // Check if account has been rejected (for donor/hospital accounts)
-    if (in_array($user['role'], ['donor', 'hospital']) && $user['status'] === 'rejected') {
-        http_response_code(403);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Your account has been rejected by the admin.',
-            'rejected' => true
-        ]);
-        exit;
+    // Check if account has been rejected or is pending (for donor/hospital accounts)
+    if (in_array($user['role'], ['donor', 'hospital'])) {
+        if ($user['status'] === 'rejected') {
+            http_response_code(403);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Your account has been rejected by the admin.',
+                'rejected' => true
+            ]);
+            exit;
+        }
+        
+        if ($user['status'] === 'pending') {
+            http_response_code(403);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Your account is under review. Please wait for admin approval.',
+                'requires_approval' => true
+            ]);
+            exit;
+        }
     }
 
     // Optional: Check if selected role matches user's role
@@ -94,16 +105,19 @@ try {
         exit;
     }
 
-    // Clear any existing session data
-    session_regenerate_id(true);
+    // Generate JWT Payload
+    $payload = [
+        'userId' => $user['id'],
+        'email' => $user['email'],
+        'role' => $user['role'],
+        'name' => $user['name']
+    ];
 
-    // Set session data
-    $_SESSION['user_id'] = $user['id'];
-    $_SESSION['email'] = $user['email'];
-    $_SESSION['role'] = $user['role'];
-    $_SESSION['name'] = $user['name'];
-    $_SESSION['logged_in'] = true;
-    $_SESSION['login_time'] = time();
+    $accessToken = JWT::generateToken($payload, JWT_ACCESS_SECRET, JWT_ACCESS_EXPIRES);
+    $refreshToken = JWT::generateToken($payload, JWT_REFRESH_SECRET, JWT_REFRESH_EXPIRES);
+
+    // Set HttpOnly Cookies
+    setAuthCookie($accessToken, $refreshToken);
 
     // Return success response
     echo json_encode([
@@ -114,6 +128,10 @@ try {
             'email' => $user['email'],
             'role' => $user['role'],
             'name' => $user['name']
+        ],
+        'tokens' => [
+            'accessToken' => $accessToken,
+            'refreshToken' => $refreshToken
         ]
     ]);
 

@@ -303,44 +303,14 @@ export default function DashboardLayout({ role = 'donor' }) {
               )}
             </div>
 
-            {/* Profile */}
-            <div className="relative">
-              <button
-                onClick={() => {
-                  setNotifOpen(false)
-                  setProfileOpen((o) => !o)
-                }}
-                className="flex items-center gap-2 rounded-md border border-gray-200 py-1 pl-1 pr-2 transition-colors hover:bg-gray-100 dark:border-slate-700 dark:hover:bg-slate-700"
-              >
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-red-100 text-xs font-semibold text-red-700 dark:bg-red-950/50 dark:text-red-300">
-                  {initials}
-                </span>
-                <span className="hidden text-sm font-medium text-gray-700 dark:text-slate-200 sm:block">
-                  {user?.name}
-                </span>
-                <ChevronDown className="h-4 w-4 text-gray-400" />
-              </button>
-              {profileOpen && (
-                <div className="absolute right-0 top-12 z-50 w-48 overflow-hidden rounded-md border border-gray-200 bg-white py-1 shadow-xl dark:border-slate-700 dark:bg-slate-800">
-                  <Link
-                    to={`/${role}/profile`}
-                    onClick={closeMenus}
-                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 dark:text-slate-300 dark:hover:bg-slate-700"
-                  >
-                    <User className="h-4 w-4" /> View profile
-                  </Link>
-                  <button className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 dark:text-slate-300 dark:hover:bg-slate-700">
-                    <Settings className="h-4 w-4" /> Settings
-                  </button>
-                  <div className="my-1 border-t border-gray-100 dark:border-slate-700" />
-                  <button
-                    onClick={handleLogout}
-                    className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
-                  >
-                    <LogOut className="h-4 w-4" /> Logout
-                  </button>
-                </div>
-              )}
+            {/* Profile - Just display, no dropdown since sidebar has the links */}
+            <div className="flex items-center gap-2 rounded-md border border-gray-200 py-1 pl-1 pr-2 dark:border-slate-700 bg-white dark:bg-slate-800">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-red-100 text-xs font-semibold text-red-700 dark:bg-red-950/50 dark:text-red-300">
+                {initials}
+              </span>
+              <span className="hidden text-sm font-medium text-gray-700 dark:text-slate-200 sm:block">
+                {user?.name}
+              </span>
             </div>
           </div>
 

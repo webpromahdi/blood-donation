@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   Search,
   CheckCircle,
@@ -14,10 +15,19 @@ import BloodGroupBadge from '../../components/shared/BloodGroupBadge'
 import { api } from '../../utils/apiService'
 
 export default function TrackRequest() {
-  const [searchValue, setSearchValue] = useState('')
+  const [searchParams] = useSearchParams()
+  const q = searchParams.get('q') || ''
+  const [searchValue, setSearchValue] = useState(q)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [results, setResults] = useState([])
+
+  useEffect(() => {
+    if (q) {
+      handleTrack()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleTrack = async (e) => {
     e?.preventDefault()
@@ -53,10 +63,10 @@ export default function TrackRequest() {
     
     // Map backend status to 4 steps
     let currentStep = 0
-    if (currentStatus === 'pending') currentStep = 0
-    else if (currentStatus === 'approved') currentStep = 1
-    else if (['donor_assigned', 'on_the_way', 'reached'].includes(currentStatus)) currentStep = 2
-    else if (currentStatus === 'completed') currentStep = 3
+    if (currentStatus === 'pending') currentStep = 1 // Under Review is active
+    else if (currentStatus === 'approved') currentStep = 2 // Working towards Matched
+    else if (['donor_assigned', 'on_the_way', 'reached'].includes(currentStatus)) currentStep = 3 // Working towards Fulfilled
+    else if (currentStatus === 'completed') currentStep = 4 // All completed
 
     if (rejectedStatuses.includes(currentStatus)) {
       return stepIndex === 0 ? 'past' : 'future' // Only "submitted" is past, rest are future

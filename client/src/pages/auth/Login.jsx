@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { GoogleLogin } from '@react-oauth/google'
 import {
   ArrowLeft,
   Heart,
@@ -17,6 +18,7 @@ import Button from '../../components/ui/Button'
 import ThemeToggle from '../../components/shared/ThemeToggle'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../components/ui/Toast'
+import { api } from '../../utils/apiService'
 import { DEMO_CREDENTIALS } from '../../utils/constants'
 
 const ROLES = [
@@ -45,7 +47,7 @@ function GoogleIcon() {
 }
 
 export default function Login() {
-  const { login } = useAuth()
+  const { login, setSessionUser } = useAuth()
   const { toast } = useToast()
   const navigate = useNavigate()
 
@@ -59,6 +61,31 @@ export default function Login() {
     const demo = DEMO_CREDENTIALS[selectedRole]
     setForm({ email: demo.email, password: demo.password })
     setErrors({})
+  }
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setIsLoading(true)
+    setErrors({})
+    try {
+      const data = await api.post('/auth/google.php', { credential: credentialResponse.credential })
+      
+      if (data.success) {
+        // Successful login
+        setSessionUser(data.user)
+        toast('Welcome back to BloodConnect!', { type: 'success', title: 'Signed in' })
+        navigate(REDIRECT[data.user.role] || '/')
+      } else if (data.requires_registration) {
+        // New user
+        toast('Please complete your profile to register.', { type: 'info' })
+        navigate('/register', { state: { googleData: data.google_data } })
+      } else {
+        setErrors({ general: data.message || 'Google Login failed.' })
+      }
+    } catch (err) {
+      setErrors({ general: 'Network error. Make sure the server is running.' })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const validate = () => {
@@ -212,14 +239,11 @@ export default function Login() {
         </div>
 
         {/* Social buttons */}
-        <div className="flex flex-col gap-3">
-          <button className="flex items-center justify-center gap-3 rounded-md border border-gray-200 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700">
-            <GoogleIcon /> Continue with Google
-          </button>
-          <button className="flex items-center justify-center gap-3 rounded-md bg-blue-600 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700">
-            <span className="font-serif text-lg font-bold leading-none">f</span>
-            Continue with Facebook
-          </button>
+        <div className="flex flex-col items-center gap-3">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => toast('Google Login Failed', { type: 'error' })}
+          />
         </div>
 
         <p className="mt-6 text-center text-sm text-gray-500 dark:text-slate-400">
