@@ -100,7 +100,7 @@ export default function AdminDashboard() {
     responsive: true,
     maintainAspectRatio: false,
     cutout: '65%',
-    plugins: { legend: { position: 'right', labels: { boxWidth: 12, padding: 12 } } },
+    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12 } } },
   }
 
   // Donations bar chart (use blood group data for now)
@@ -268,7 +268,7 @@ export default function AdminDashboard() {
             Donors by Blood Group
           </h3>
           <p className="text-sm text-gray-500 dark:text-slate-400">Approved donor distribution</p>
-          <div className="mt-6 h-72">
+          <div className="relative mt-6 h-72 w-full">
             <Bar data={barData} options={barOptions} />
           </div>
         </div>
@@ -277,7 +277,7 @@ export default function AdminDashboard() {
             Blood Group Distribution
           </h3>
           <p className="text-sm text-gray-500 dark:text-slate-400">Donor count by group</p>
-          <div className="mt-6 h-72">
+          <div className="relative mt-6 h-72 w-full">
             <Doughnut data={doughnutData} options={doughnutOptions} />
           </div>
         </div>

@@ -432,7 +432,7 @@ export default function DonorDashboard() {
             </div>
             <BloodGroupBadge group={profile?.blood_group || user?.blood_group || 'N/A'} />
           </div>
-          <div className="mt-6 h-64"><Line data={chartData} options={chartOptions} /></div>
+          <div className="relative mt-6 h-64 w-full"><Line data={chartData} options={chartOptions} /></div>
         </div>
         <div className="rounded-md border border-gray-200 bg-white p-6 shadow-[var(--shadow-card)] dark:border-slate-700 dark:bg-slate-800">
           <h3 className="font-semibold text-gray-900 dark:text-slate-100">Eligibility status</h3>

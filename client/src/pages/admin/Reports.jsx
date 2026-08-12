@@ -118,7 +118,7 @@ export default function Reports() {
   const doughnutOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { position: 'right', labels: { color: AXIS } } },
+    plugins: { legend: { position: 'bottom', labels: { color: AXIS } } },
   }
 
   const lineOptions = {
@@ -167,7 +167,7 @@ export default function Reports() {
               <p className="text-sm text-gray-500 dark:text-slate-400">Monthly comparison</p>
             </div>
           </div>
-          <div className="h-72">
+          <div className="relative h-72 w-full">
             <Bar data={dualBar} options={barOptions} />
           </div>
         </div>
@@ -175,7 +175,7 @@ export default function Reports() {
         {/* Blood Group Distribution */}
         <div className="rounded-md border border-gray-200 bg-white p-6 shadow-[var(--shadow-card)] dark:border-slate-700 dark:bg-slate-800">
           <h3 className="mb-6 font-semibold text-gray-900 dark:text-slate-100">Donor Demographics</h3>
-          <div className="h-64">
+          <div className="relative h-64 w-full">
             <Doughnut data={doughnutData} options={doughnutOptions} />
           </div>
         </div>
